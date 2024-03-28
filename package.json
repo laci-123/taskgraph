@@ -1,0 +1,17 @@
+{
+  "name": "taskgraph",
+  "version": "1.0.0",
+  "description": "Todo-app with dependencies among tasks",
+  "private": true,
+  "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "build": "webpack"
+  },
+  "author": "Gohér László",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.4.3",
+    "webpack-cli": "^5.1.4"
+  }
+}
