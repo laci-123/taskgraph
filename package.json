@@ -4,12 +4,15 @@
   "description": "Todo-app with dependencies among tasks",
   "private": true,
   "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1",
-      "build": "webpack"
+    "test": "jest",
+    "build": "webpack"
   },
   "author": "Gohér László",
   "license": "ISC",
   "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.3",
     "webpack-cli": "^5.1.4"
