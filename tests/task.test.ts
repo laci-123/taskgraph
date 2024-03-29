@@ -193,3 +193,14 @@ test("deadlines and priorities propagate correctly (multiple roots)", () => {
     expect(task3.priority).toEqual(0);
     expect(task3.deadline).toEqual("never");
 });
+
+test("trivial circular dependency is detected", () => {
+    expect(() => new TaskGraph([{id: 0, name: "think of something clever", dependencies: [0]}])).toThrow("Circular dependencies");
+});
+
+test("non-trivial circular dependency is dtected", () => {
+    expect(() => new TaskGraph([{id: 0, name: "go shopping", dependencies: [1]}, 
+                                {id: 1, name: "fix car",     dependencies: [2]},
+                                {id: 2, name: "buy tools",   dependencies: [0]}]))
+        .toThrow("Circular dependencies");
+});

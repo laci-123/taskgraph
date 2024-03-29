@@ -64,6 +64,10 @@ export class TaskGraph {
             }
         }
 
+        if(this.tasks.size > 0 && roots.size === 0) {
+            throw new Error("Circular dependencies");
+        }
+
         // propagate deadlines and priorities using depth-first search
         roots.forEach((root) => {
             propagate(root, colors);
