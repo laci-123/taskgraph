@@ -12,7 +12,7 @@ interface RawTask {
     dependencies: number[],
 }
 
-class Task {
+export class Task {
     constructor(
         public id: number,
         public name: string,
@@ -20,7 +20,7 @@ class Task {
         public priority: number = 0,
         public effective_priority: number = 0,
         public deadline: MaybeDate = "never",
-        public effective_deadline: Date | "never" = "never",
+        public effective_deadline: MaybeDate = "never",
         public birthline: MaybeDate = "never",
         public progress: Progress = "todo",
         public depends_on: Task[] = [],
@@ -28,11 +28,17 @@ class Task {
     {}
 }
 
-class TaskGraph {
+export class TaskGraph {
     private tasks: Map<number, Task>;
 
+    public get all_tasks(): Iterable<Task> {
+        return this.tasks.values();
+    }
+
     constructor(raw_tasks: RawTask[]) {
-        // tasks that aren't blocked by any other task
+        this.tasks = new Map();
+        
+        // tasks that don't depend on any other tasks
         const roots = new Set<Task>();
         // needed for the depth-first search later
         const colors = new Map<Task, "white" | "grey" | "black">();
@@ -42,7 +48,9 @@ class TaskGraph {
             // effective priority and effective deadline are by default the same as priority and deadline
             const task = new Task(rt.id, rt.name, rt.description, rt.priority, rt.priority, rt.deadline, rt.deadline, rt.birthline, rt.progress);
             this.tasks.set(rt.id, task);
-            roots.add(task);
+            if(rt.dependencies.length === 0) {
+                roots.add(task);
+            }
             colors.set(task, "white");
         }
 
@@ -53,44 +61,38 @@ class TaskGraph {
                 let dep_task = this.tasks.get(dep_id);
                 task.depends_on.push(dep_task);
                 dep_task.blocked_by.push(task);
-                roots.delete(dep_task); // dep_task is blocked by task, so it cannot be a root
             }
         }
 
         // propagate deadlines and priorities using depth-first search
         roots.forEach((root) => {
-            const stack = new Array<Task>();
-            stack.push(root);
-
-            while(stack.length > 0) {
-                const task = stack.pop();
-                const color = colors.get(task);
-
-                if(color === "grey") {
-                    throw new Error("Circular dependencies");
-                }
-                
-                if(task.depends_on.length === 0 || color === "black") {
-                    if(stack.length > 0) {
-                        const prev_task = stack[stack.length - 1];
-                        if(task.effective_priority > prev_task.priority) {
-                            prev_task.effective_priority = task.effective_priority;
-                        }
-                        if(prev_task.effective_deadline === "never" ||
-                           (task.effective_deadline !== "never" && task.effective_deadline < prev_task.deadline))
-                        {
-                            prev_task.effective_deadline = task.effective_deadline;
-                        }
-                    }
-                    colors.set(task, "black");
-                    continue;
-                }
-
-                for(const dep_task of task.depends_on) {
-                    stack.push(dep_task);
-                    colors.set(dep_task, "grey");
-                }
-            }
+            propagate(root, colors);
         });
     }
+}
+
+function propagate(task: Task, colors: Map<Task, "white" | "grey" | "black">): {max_priority: number, min_deadline: MaybeDate} {
+    const color = colors.get(task);
+    if(color === "grey") {
+        throw new Error("Circular dependencies");
+    }
+
+    if(task.blocked_by.length === 0 || color === "black") {
+        colors.set(task, "black");
+        return {max_priority: task.effective_priority, min_deadline: task.effective_deadline};
+    }
+
+    colors.set(task, "grey");
+    for(const blocking_task of task.blocked_by) {
+        let result = propagate(blocking_task, colors);
+        if(result.max_priority > task.effective_priority) {
+            task.effective_priority = result.max_priority;
+        }
+        if(task.effective_deadline === "never" || (result.min_deadline !== "never" && result.min_deadline < task.effective_deadline)) {
+            task.effective_deadline = result.min_deadline;
+        }
+    }
+
+    colors.set(task, "black");
+    return {max_priority: task.effective_priority, min_deadline: task.effective_deadline};
 }
