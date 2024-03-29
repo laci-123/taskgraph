@@ -63,10 +63,12 @@ export class TaskGraph {
                     throw new Error(`Reference to non-existent task (${rt.id} --> ${dep_id})`);
                 }
                 task.depends_on.push(dep_task);
+                task.progress = "blocked";
                 dep_task.blocked_by.push(task);
             }
         }
 
+        // there are no roots --> all tasks depend on at least one other task --> there is a dependency-circle
         if(this.tasks.size > 0 && roots.size === 0) {
             throw new Error("Circular dependencies");
         }
@@ -84,13 +86,16 @@ function propagate(task: Task, colors: Map<Task, "white" | "grey" | "black">): {
         throw new Error("Circular dependencies");
     }
 
-    if(task.blocked_by.length === 0 || color === "black") {
+    if(task.blocked_by.length === 0 || (color === "black" && task.progress !== "failed")) {
         colors.set(task, "black");
         return {max_priority: task.effective_priority, min_deadline: task.effective_deadline};
     }
 
     colors.set(task, "grey");
     for(const blocking_task of task.blocked_by) {
+        if(task.progress === "failed") {
+            blocking_task.progress = "failed";
+        }
         let result = propagate(blocking_task, colors);
         if(result.max_priority > task.effective_priority) {
             task.effective_priority = result.max_priority;
