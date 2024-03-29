@@ -56,9 +56,12 @@ export class TaskGraph {
 
         // connect dependent tasks
         for(const rt of raw_tasks) {
-            let task = this.tasks.get(rt.id);
+            const task = this.tasks.get(rt.id);
             for(const dep_id of rt.dependencies) {
-                let dep_task = this.tasks.get(dep_id);
+                const dep_task = this.tasks.get(dep_id);
+                if(!dep_task) {
+                    throw new Error(`Reference to non-existent task (${rt.id} --> ${dep_id})`);
+                }
                 task.depends_on.push(dep_task);
                 dep_task.blocked_by.push(task);
             }

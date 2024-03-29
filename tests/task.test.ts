@@ -204,3 +204,9 @@ test("non-trivial circular dependency is dtected", () => {
                                 {id: 2, name: "buy tools",   dependencies: [0]}]))
         .toThrow("Circular dependencies");
 });
+
+test("references to non-existent tasks are detected", () => {
+    expect(() => new TaskGraph([{id: 0, name: "catch a unicorn",           dependencies: [1, 100]}, 
+                                {id: 1, name: "go to where unicorns live", dependencies: []}]))
+        .toThrow("Reference to non-existent task (0 --> 100)");
+});
