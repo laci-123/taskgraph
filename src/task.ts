@@ -1,4 +1,4 @@
-import {MaybeDate, compare_dates} from "./maybedate";
+import {MaybeDate, compare_dates, get_time} from "./maybedate";
 
 
 type Progress  = "blocked" | "todo" | "doing" | "done" | "failed";
@@ -30,18 +30,73 @@ export class Task {
     {}
 }
 
+function compare_tasks_regardless_of_deadline(a: Task, b: Task): number {
+    if(a.effective_priority > b.effective_priority) {
+        return -1;
+    }
+    else if(a.effective_priority < b.effective_priority) {
+        return +1;
+    }
+    else {
+        return compare_dates(a.effective_deadline, b.effective_deadline);
+    }
+}
+
+export function compare_tasks(now: Date, close_to_deadline: number): (a: Task, b: Task) => number {
+    return (a, b) => {
+        const a_is_due = get_time(a.effective_deadline) - now.getTime() < close_to_deadline;
+        const b_is_due = get_time(b.effective_deadline) - now.getTime() < close_to_deadline;
+        if(a_is_due) {
+            if(b_is_due) {
+                return compare_tasks_regardless_of_deadline(a, b);
+            }
+            else {
+                return -1;
+            }
+        }
+        else {
+            if(b_is_due) {
+                return +1;
+            }
+            else {
+                return compare_tasks_regardless_of_deadline(a, b);
+            }
+        }
+    };
+}
+
 export class TaskGraph {
-    private tasks: Map<number, Task>;
+    private tasks = new Map<number, Task>();
+    private indegrees = new Map<number, number>();
+    // tasks that don't depend on any other tasks
+    private roots = new Set<Task>();
 
     public get all_tasks(): Iterable<Task> {
         return this.tasks.values();
     }
 
+    // public get agenda(): Task[] {
+    //     const indegrees = new Map(this.indegrees); // shallow copy
+    //     const S = Array.from(this.roots.values()); // shallow copy
+    //     const L = new Array<Task>();
+
+    //     while(S.length > 0) {
+    //         const n = S.shift();
+    //         L.push(n);
+    //         for(const m of n.needed_by) {
+    //             indegrees.set(m.id, indegrees.get(m.id) - 1);
+    //             if(indegrees.get(m.id) === 0) {
+    //                 S.push(m);
+    //             }
+    //         }
+    //     }
+
+    //     // No need for checking for circles: it has already been checked in the constructor.
+
+    //     return L;
+    // }
+
     constructor(raw_tasks: RawTask[]) {
-        this.tasks = new Map();
-        
-        // tasks that don't depend on any other tasks
-        const roots = new Set<Task>();
         // needed for the depth-first search later
         const colors = new Map<Task, "white" | "grey" | "black">();
 
