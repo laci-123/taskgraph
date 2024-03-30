@@ -316,3 +316,98 @@ test("references to non-existent tasks are detected", () => {
                                 {id: 1, name: "go to where unicorns live", dependencies: []}]))
         .toThrow("Reference to non-existent task (0 --> 100)");
 });
+
+test("agenda lists all actionable tasks", () => {
+    const one_day = 24 * 60 * 60 * 1000;
+
+    const tg0 = new TaskGraph([]);
+    const agenda0 = tg0.agenda(new Date("2004-05-06"), one_day);
+    expect(agenda0).toHaveLength(0);
+
+    const tg1 = new TaskGraph([{id: 0, name: "eat an apple", dependencies: [], progress: "todo"},
+                               {id: 1, name: "eat a banana", dependencies: [], progress: "todo"},
+                               {id: 2, name: "eat a grape",  dependencies: [], progress: "todo"}]);
+    const agenda1 = tg1.agenda(new Date("2004-05-06"), one_day);
+    expect(agenda1).toHaveLength(3);
+
+    const tg2 = new TaskGraph([{id: 0, name: "eat an apple", dependencies: [1], progress: "todo"},
+                               {id: 1, name: "eat a banana", dependencies: [2], progress: "todo"},
+                               {id: 2, name: "eat a grape",  dependencies: [],  progress: "todo"}]);
+    const agenda2 = tg2.agenda(new Date("2004-05-06"), one_day);
+    expect(agenda2).toHaveLength(1);
+    expect(agenda2[0].name).toEqual("eat a grape");
+
+    const tg3 = new TaskGraph([{id: 0, name: "eat an apple", dependencies: [1], progress: "todo"},
+                               {id: 1, name: "eat a banana", dependencies: [2], progress: "todo"},
+                               {id: 2, name: "eat a grape",  dependencies: [],  progress: "failed"}]);
+    const agenda3 = tg3.agenda(new Date("2004-05-06"), one_day);
+    expect(agenda3).toHaveLength(0);
+
+    const tg4 = new TaskGraph([{id: 0, name: "eat an apple", dependencies: [],  progress: "done"},
+                               {id: 1, name: "eat a banana", dependencies: [],  progress: "done"},
+                               {id: 2, name: "eat a grape",  dependencies: [],  progress: "done"}]);
+    const agenda4 = tg4.agenda(new Date("2004-05-06"), one_day);
+    expect(agenda4).toHaveLength(0);
+
+    const tg5 = new TaskGraph([{id: 0, name: "eat an apple", dependencies: [1, 2], progress: "todo"},
+                               {id: 1, name: "eat a banana", dependencies: [],     progress: "done"},
+                               {id: 2, name: "eat a grape",  dependencies: [],     progress: "done"}]);
+    const agenda5 = tg5.agenda(new Date("2004-05-06"), one_day);
+    expect(agenda5).toHaveLength(1);
+    expect(agenda5[0].name).toEqual("eat an apple");
+});
+
+test("agenda lists tasks in right order", () => {
+    const one_day = 24 * 60 * 60 * 1000;
+
+    const tg0 = new TaskGraph([{id: 0, name: "fix car",      dependencies: [],  progress: "todo", priority: 1},
+                               {id: 1, name: "buy hammer",   dependencies: [],  progress: "todo", priority: 0},
+                               {id: 2, name: "go shopping",  dependencies: [],  progress: "todo", priority: 10},
+                               {id: 3, name: "buy bus pass", dependencies: [],  progress: "todo", priority: -1}]);
+    const agenda0 = tg0.agenda(new Date("2004-05-06"), one_day);
+    expect(agenda0).toHaveLength(4);
+    expect(agenda0[0].name).toEqual("go shopping");
+    expect(agenda0[1].name).toEqual("fix car");
+    expect(agenda0[2].name).toEqual("buy hammer");
+    expect(agenda0[3].name).toEqual("buy bus pass");
+
+    const tg1 = new TaskGraph([{id: 0, name: "fix car",      dependencies: [1], progress: "todo", priority: 1},
+                               {id: 1, name: "buy hammer",   dependencies: [],  progress: "todo", priority: 0},
+                               {id: 2, name: "go shopping",  dependencies: [3], progress: "todo", priority: 10},
+                               {id: 3, name: "buy bus pass", dependencies: [],  progress: "todo", priority: -1}]);
+    const agenda1 = tg1.agenda(new Date("2004-05-06"), one_day);
+    expect(agenda1).toHaveLength(2);
+    expect(agenda1[0].name).toEqual("buy bus pass");
+    expect(agenda1[1].name).toEqual("buy hammer");
+
+    const tg2 = new TaskGraph([{id: 0, name: "fix car",      dependencies: [1], progress: "todo", priority: 1,  deadline: new Date("2004-05-05")},
+                               {id: 1, name: "buy hammer",   dependencies: [],  progress: "todo", priority: 0,  deadline: "never"},
+                               {id: 2, name: "go shopping",  dependencies: [3], progress: "todo", priority: 10, deadline: new Date("2004-05-10")},
+                               {id: 3, name: "buy bus pass", dependencies: [],  progress: "todo", priority: -1, deadline: "never"}]);
+    const agenda2 = tg2.agenda(new Date("2004-05-06"), one_day);
+    expect(agenda2).toHaveLength(2);
+    expect(agenda2[0].name).toEqual("buy hammer");
+    expect(agenda2[1].name).toEqual("buy bus pass");
+
+    const tg3 = new TaskGraph([{id: 0, name: "fix car",      dependencies: [],  progress: "todo", priority: 1,  deadline: new Date("2004-05-20")},
+                               {id: 1, name: "buy hammer",   dependencies: [],  progress: "todo", priority: 0,  deadline: new Date("2004-05-21")},
+                               {id: 2, name: "go shopping",  dependencies: [],  progress: "todo", priority: 10, deadline: new Date("2004-05-22")},
+                               {id: 3, name: "buy bus pass", dependencies: [],  progress: "todo", priority: -1, deadline: new Date("2004-05-23")}]);
+    const agenda3 = tg3.agenda(new Date("2004-05-06"), one_day);
+    expect(agenda3).toHaveLength(4);
+    expect(agenda3[0].name).toEqual("go shopping");
+    expect(agenda3[1].name).toEqual("fix car");
+    expect(agenda3[2].name).toEqual("buy hammer");
+    expect(agenda3[3].name).toEqual("buy bus pass");
+
+    const tg4 = new TaskGraph([{id: 0, name: "fix car",      dependencies: [],  progress: "todo", priority: 1, deadline: new Date("2004-05-20")},
+                               {id: 1, name: "buy hammer",   dependencies: [],  progress: "todo", priority: 1, deadline: new Date("2004-05-21")},
+                               {id: 2, name: "go shopping",  dependencies: [],  progress: "todo", priority: 1, deadline: new Date("2004-05-22")},
+                               {id: 3, name: "buy bus pass", dependencies: [],  progress: "todo", priority: 1, deadline: new Date("2004-05-23")}]);
+    const agenda4 = tg4.agenda(new Date("2004-05-06"), one_day);
+    expect(agenda4).toHaveLength(4);
+    expect(agenda4[0].name).toEqual("fix car");
+    expect(agenda4[1].name).toEqual("buy hammer");
+    expect(agenda4[2].name).toEqual("go shopping");
+    expect(agenda4[3].name).toEqual("buy bus pass");
+});

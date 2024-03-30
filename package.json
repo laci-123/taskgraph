@@ -16,5 +16,8 @@
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.3",
     "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "ts-priority-queue": "^0.1.1"
   }
 }
