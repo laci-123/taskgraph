@@ -204,6 +204,26 @@ test("deadlines and priorities propagate correctly (multiple roots)", () => {
     expect(task3.progress).toEqual("todo");
 });
 
+test("task is unblocked if and only if all of its dependencies are DONE", () => {
+    const tg1 = new TaskGraph([{id: 0, name: "write a book",       dependencies: [1, 2], progress: "todo"},
+                               {id: 1, name: "learn how to write", dependencies: [],     progress: "todo"},
+                               {id: 2, name: "have a good idea",   dependencies: [],     progress: "todo"}]);
+    const tasks1 = Array.from(tg1.all_tasks);
+    expect(tasks1[0].progress).toEqual("blocked");
+
+    const tg2 = new TaskGraph([{id: 0, name: "write a book",       dependencies: [1, 2], progress: "todo"},
+                               {id: 1, name: "learn how to write", dependencies: [],     progress: "done"},
+                               {id: 2, name: "have a good idea",   dependencies: [],     progress: "todo"}]);
+    const tasks2 = Array.from(tg2.all_tasks);
+    expect(tasks2[0].progress).toEqual("blocked");
+
+    const tg3 = new TaskGraph([{id: 0, name: "write a book",       dependencies: [1, 2], progress: "todo"},
+                               {id: 1, name: "learn how to write", dependencies: [],     progress: "done"},
+                               {id: 2, name: "have a good idea",   dependencies: [],     progress: "done"}]);
+    const tasks3 = Array.from(tg3.all_tasks);
+    expect(tasks3[0].progress).toEqual("todo");
+});
+
 test("failure is propagated", () => {
     const tg = new TaskGraph([{id: 0, name: "eat breakfast",  dependencies: [1]},
                               {id: 1, name: "make breakfast", dependencies: [2, 3]},
