@@ -1,4 +1,6 @@
-type MaybeDate = Date | "never";
+import {MaybeDate, compare_dates} from "./maybedate";
+
+
 type Progress  = "blocked" | "todo" | "doing" | "done" | "failed";
 
 interface RawTask {
@@ -103,7 +105,7 @@ function propagate(task: Task, colors: Map<Task, "white" | "grey" | "black">): {
         if(result.max_priority > task.effective_priority) {
             task.effective_priority = result.max_priority;
         }
-        if(task.effective_deadline === "never" || (result.min_deadline !== "never" && result.min_deadline < task.effective_deadline)) {
+        if(compare_dates(result.min_deadline, task.effective_deadline) < 0) {
             task.effective_deadline = result.min_deadline;
         }
     }
