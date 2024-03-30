@@ -20,7 +20,7 @@ test("TaskGraph with one task (with missing fields) constructs properly", () => 
     expect(task.birthline).toEqual("never");
     expect(task.progress).toEqual("todo");
     expect(task.depends_on).toHaveLength(0);
-    expect(task.blocked_by).toHaveLength(0);
+    expect(task.needed_by).toHaveLength(0);
 });
 
 test("TaskGraph with one task (without missing fields) constructs properly", () => {
@@ -45,7 +45,7 @@ test("TaskGraph with one task (without missing fields) constructs properly", () 
     expect(task.birthline).toEqual("never");
     expect(task.progress).toEqual("doing");
     expect(task.depends_on).toHaveLength(0);
-    expect(task.blocked_by).toHaveLength(0);
+    expect(task.needed_by).toHaveLength(0);
 });
 
 test("TaskGraph with multiple independent tasks constructs properly", () => {
@@ -61,7 +61,7 @@ test("TaskGraph with multiple independent tasks constructs properly", () => {
     expect(task1.effective_priority).toEqual(0);
     expect(task1.effective_deadline).toEqual("never");
     expect(task1.depends_on).toHaveLength(0);
-    expect(task1.blocked_by).toHaveLength(0);
+    expect(task1.needed_by).toHaveLength(0);
 
     const task2 = tasks[1];
     expect(task2.id).toBe(2)
@@ -69,7 +69,7 @@ test("TaskGraph with multiple independent tasks constructs properly", () => {
     expect(task2.effective_priority).toEqual(0);
     expect(task2.effective_deadline).toEqual("never");
     expect(task2.depends_on).toHaveLength(0);
-    expect(task2.blocked_by).toHaveLength(0);
+    expect(task2.needed_by).toHaveLength(0);
 
     const task3 = tasks[2];
     expect(task3.id).toBe(3)
@@ -77,26 +77,26 @@ test("TaskGraph with multiple independent tasks constructs properly", () => {
     expect(task3.effective_priority).toEqual(0);
     expect(task3.effective_deadline).toEqual("never");
     expect(task3.depends_on).toHaveLength(0);
-    expect(task3.blocked_by).toHaveLength(0);
+    expect(task3.needed_by).toHaveLength(0);
 });
 
 test("deadlines and priorities propagate correctly (one root)", () => {
     //               +-----------"cook lunch" 2030-02-01 (+5) ---------+
     //               |                                                 |
     //               v                                                 v
-    // "buy some food" 2030-02-05 (+8)                  "buy bus pass" 2030-01-30 (-1)
+    // "buy some food" 2030-02-05 (+8)                  "buy a stove" 2030-01-30 (-1)
     //               |                                                 |
     //               |                                                 |
     //               +---------->"get some money" never (0) <----------+
     const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("2030-02-01"), priority: 5,  dependencies: [1, 2]},
                               {id: 1, name: "buy some food",  deadline: new Date("2030-02-05"), priority: 8,  dependencies: [3]},
-                              {id: 2, name: "buy bus pass",   deadline: new Date("2030-01-30"), priority: -1, dependencies: [3]},
+                              {id: 2, name: "buy a stove",    deadline: new Date("2030-01-30"), priority: -1, dependencies: [3]},
                               {id: 3, name: "get some money", deadline: "never",                priority: 0,  dependencies: []}]);
     
     const tasks = Array.from(tg.all_tasks);
     expect(tasks).toHaveLength(4);
 
-    // "cook lunch" doesn't block any other task therefore it remains completely unchanged
+    // "cook lunch" is not needed by any other task therefore it remains completely unchanged
     const task0 = tasks[0];
     expect(task0.id).toEqual(0);
     expect(task0.name).toEqual("cook lunch");
@@ -104,15 +104,15 @@ test("deadlines and priorities propagate correctly (one root)", () => {
     expect(task0.effective_deadline).toEqual(new Date("2030-02-01"));
     expect(task0.priority).toEqual(5);
     expect(task0.deadline).toEqual(new Date("2030-02-01"));
-    // ...apart from being blocked
+    // ...apart from being blocked (because it has unfinished dependencies)
     expect(task0.progress).toEqual("blocked");
 
     const task1 = tasks[1];
     expect(task1.id).toEqual(1);
     expect(task1.name).toEqual("buy some food");
-    // "buy some food" blocks "cook lunch" but its priority is greater so it remains the same
+    // "buy some food" is needed by "cook lunch" but its priority is greater so it remains the same
     expect(task1.effective_priority).toEqual(8); 
-    // "buy some food" blocks "cook lunch" whose deadline is sooner than its own therefore it gets adjusted
+    // "buy some food" is needed by "cook lunch" whose deadline is sooner than its own therefore it gets adjusted
     expect(task1.effective_deadline).toEqual(new Date("2030-02-01"));
     // the original priority and deadline don't get modified
     expect(task1.priority).toEqual(8);
@@ -121,10 +121,10 @@ test("deadlines and priorities propagate correctly (one root)", () => {
 
     const task2 = tasks[2];
     expect(task2.id).toEqual(2);
-    expect(task2.name).toEqual("buy bus pass");
-    // "buy bus pass" blocks "cook lunch" wich has priority 5 (greater than its own) so it gets priority 5, too
+    expect(task2.name).toEqual("buy a stove");
+    // "buy a stove" is needed by "cook lunch" wich has priority 5 (greater than its own) so it gets priority 5, too
     expect(task2.effective_priority).toEqual(5); 
-    // "buy bus pass" blocks "cook lunch" but its deadline is sooner therefore it remains the same
+    // "buy a stove" is needed by "cook lunch" but its deadline is sooner therefore it remains the same
     expect(task2.effective_deadline).toEqual(new Date("2030-01-30"));
     // the original priority and deadline don't get modified
     expect(task2.priority).toEqual(-1);
@@ -134,9 +134,9 @@ test("deadlines and priorities propagate correctly (one root)", () => {
     const task3 = tasks[3];
     expect(task3.id).toEqual(3);
     expect(task3.name).toEqual("get some money");
-    // gets the highest priority of the tasks it blocks
+    // gets the highest priority of the two tasks it is needed by
     expect(task3.effective_priority).toEqual(8); 
-    // gets the soonest deadline of the tasks it blocks
+    // gets the soonest deadline of the two tasks it is needed by
     expect(task3.effective_deadline).toEqual(new Date("2030-01-30"));
     // the original priority and deadline don't get modified
     expect(task3.priority).toEqual(0);
@@ -162,7 +162,7 @@ test("deadlines and priorities propagate correctly (multiple roots)", () => {
     const tasks = Array.from(tg.all_tasks);
     expect(tasks).toHaveLength(4);
 
-    // "eat breakfast" doesn't block any other task therefore it remains completely unchanged
+    // "eat breakfast" is not needed by any other task therefore it remains completely unchanged
     const task0 = tasks[0];
     expect(task0.id).toEqual(0);
     expect(task0.name).toEqual("eat breakfast");
@@ -170,10 +170,10 @@ test("deadlines and priorities propagate correctly (multiple roots)", () => {
     expect(task0.effective_deadline).toEqual(new Date("2025-02-01"));
     expect(task0.priority).toEqual(5);
     expect(task0.deadline).toEqual(new Date("2025-02-01"));
-    // ...apart from being blocked
+    // ...apart from being blocked (because it has unfinished dependencies)
     expect(task0.progress).toEqual("blocked");
 
-    // "make breakfast" blocks "eat breakfast" therefore it inherits its higher priority and sooner deadline
+    // "make breakfast" is needed by "eat breakfast" therefore it inherits its higher priority and sooner deadline
     const task1 = tasks[1];
     expect(task1.id).toEqual(1);
     expect(task1.name).toEqual("make breakfast");
@@ -183,7 +183,7 @@ test("deadlines and priorities propagate correctly (multiple roots)", () => {
     expect(task1.deadline).toEqual("never");
     expect(task0.progress).toEqual("blocked");
 
-    // "buy apples" blocks "make breakfast" therefore it inherits its (already inherited) higher priority and sooner deadline
+    // "buy apples" is needed by "make breakfast" therefore it inherits its (already inherited) higher priority and sooner deadline
     const task2 = tasks[2];
     expect(task2.id).toEqual(2);
     expect(task2.name).toEqual("buy apples");
@@ -193,7 +193,7 @@ test("deadlines and priorities propagate correctly (multiple roots)", () => {
     expect(task2.deadline).toEqual("never");
     expect(task2.progress).toEqual("todo");
 
-    // "buy bananas" blocks "make breakfast" therefore it inherits its (already inherited) higher priority and sooner deadline
+    // "buy bananas" is needed by "make breakfast" therefore it inherits its (already inherited) higher priority and sooner deadline
     const task3 = tasks[3];
     expect(task3.id).toEqual(3);
     expect(task3.name).toEqual("buy bananas");

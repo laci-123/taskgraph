@@ -24,7 +24,7 @@ export class Task {
         public birthline: MaybeDate = "never",
         public progress: Progress = "todo",
         public depends_on: Task[] = [],
-        public blocked_by: Task[] = [])
+        public needed_by: Task[] = [])
     {}
 }
 
@@ -63,7 +63,7 @@ export class TaskGraph {
                     throw new Error(`Reference to non-existent task (${rt.id} --> ${dep_id})`);
                 }
                 task.depends_on.push(dep_task);
-                dep_task.blocked_by.push(task);
+                dep_task.needed_by.push(task);
             }
         }
 
@@ -85,13 +85,13 @@ function propagate(task: Task, colors: Map<Task, "white" | "grey" | "black">): {
         throw new Error("Circular dependencies");
     }
 
-    if(task.blocked_by.length === 0 || (color === "black" && task.progress !== "failed")) {
+    if(task.needed_by.length === 0 || (color === "black" && task.progress !== "failed")) {
         colors.set(task, "black");
         return {max_priority: task.effective_priority, min_deadline: task.effective_deadline};
     }
 
     colors.set(task, "grey");
-    for(const using_task of task.blocked_by) {
+    for(const using_task of task.needed_by) {
         if(task.progress !== "done" && using_task.progress !== "failed") {
             using_task.progress = "blocked";
         }
