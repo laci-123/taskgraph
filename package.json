@@ -4,8 +4,8 @@
   "description": "Todo-app with dependencies among tasks",
   "private": true,
   "scripts": {
-    "test": "jest",
-    "build": "webpack"
+      "test": "jest",
+      "build": "webpack && cp index.html ./dist/index.html"
   },
   "author": "Gohér László",
   "license": "ISC",
