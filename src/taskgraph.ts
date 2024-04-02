@@ -1,6 +1,6 @@
 import {MaybeDate, compare_dates} from "./maybedate";
 import {Task, RawTask, compare_tasks} from "./task";
-import PriorityQueue from "ts-priority-queue";
+import PriorityQueue from "priority-queue-typescript";
 
 
 export class TaskGraph {
@@ -20,20 +20,23 @@ export class TaskGraph {
         // we use a priority queue sorted by the tasks priority and deadline.
         // This way independent tasks will be sorted correctly. 
 
-        const indegrees = new Map(this.indegrees); // shallow copy
-        const S = new PriorityQueue({comparator:    compare_tasks(now, close_to_deadline),
-                                     initialValues: Array.from(this.roots.values())});
+        const indegrees = new Map(this.indegrees);         // shallow copy
+        const roots     = Array.from(this.roots.values()); // shallow copy
+        const S = new PriorityQueue<Task>(roots.length > 0 ? roots.length : 1, compare_tasks(now, close_to_deadline));
+        for(const root of roots) {
+            S.add(root);
+        }
         const L = new Array<Task>();
 
-        while(S.length > 0) {
-            const n = S.dequeue();
+        while(S.size() > 0) {
+            const n = S.poll();
             if(n.progress === "todo" || n.progress === "doing") {
                 L.push(n);
             }
             for(const m of n.needed_by) {
                 indegrees.set(m.id, indegrees.get(m.id) - 1);
                 if(indegrees.get(m.id) === 0) {
-                    S.queue(m);
+                    S.add(m);
                 }
             }
         }
