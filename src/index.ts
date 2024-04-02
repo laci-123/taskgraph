@@ -1,13 +1,26 @@
-import {Counter} from "./counter";
+import {TaskGraph} from "./taskgraph";
+
 
 const button = document.getElementById("button");
 const output = document.getElementById("output");
 
+const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("2024-04-03"), priority: 5,  dependencies: [1, 4]},
+                          {id: 1, name: "buy some food",  deadline: new Date("2024-04-05"), priority: 0,  dependencies: [3]},
+                          {id: 2, name: "walk the dog",    deadline: new Date("2024-04-01"), priority: 10, dependencies: []},
+                          {id: 3, name: "go to the store", deadline: "never",                priority: 0,  dependencies: [5]},
+                          {id: 4, name: "learn how to cook", deadline: "never",              priority: 0, dependencies: []},
+                          {id: 5, name: "fix the car",      deadline: "never",               priority: -1, dependencies: []},
+                          {id: 6, name: "return library books", deadline: new Date("2023-03-30"), priority: 0, dependencies: [5]}]);
+
 if (button && output)
 {
-    const counter = new Counter(0);
     button.addEventListener("click", (_) => {
-        counter.increase(1);
-        output.innerHTML = `Már ${counter.get_value()} alkalommal megnyomták a gombot!`;
+        const one_day = 24 * 60 * 60 * 1000;
+        const agenda = tg.agenda(new Date(), one_day);
+        output.innerHTML += "<ol>";
+        for(const task of agenda) {
+            output.innerHTML += `<li>${task.name}</li>`;
+        }
+        output.innerHTML += "</ol>";
     });
 }

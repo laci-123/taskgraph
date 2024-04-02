@@ -5,14 +5,18 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.tsx?$/,
-                use: 'ts-loader',
-                exclude: /node_modules/,
+                test: /\.ts/,
+                use: {
+                    loader: 'ts-loader',
+                    options: {
+                        allowTsInNodeModules: true,
+                    }
+                }
             },
         ],
     },
     resolve: {
-        extensions: ['.tsx', '.ts'],
+        extensions: ['.ts'],
     },
     output: {
         filename: 'bundle.js',
