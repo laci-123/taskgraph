@@ -1,5 +1,5 @@
 import {MaybeDate, compare_dates} from "./maybedate";
-import {Task, RawTask, compare_tasks} from "./task";
+import {Task, RawTask, compare_tasks, Progress} from "./task";
 import PriorityQueue from "priority-queue-typescript";
 
 
@@ -12,6 +12,11 @@ export class TaskGraph {
 
     public get all_tasks(): Task[] {
         return Array.from(this.tasks.values());
+    }
+
+    public all_tasks_by_progress(progress: Progress): Task[] {
+        const tasks = Array.from(this.tasks.values());
+        return tasks.filter((task) => task.progress === progress);
     }
 
     public agenda(now: Date, close_to_deadline: number): Task[] {

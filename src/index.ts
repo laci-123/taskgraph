@@ -1,5 +1,6 @@
 import {TaskGraph} from "./taskgraph";
-import { show_agenda, show_all_tasks } from "./gui";
+import { show_agenda, show_all_tasks, show_all_tasks_by_progress } from "./gui";
+import { isProgress } from "./task";
 
 const main_list = document.getElementById("main-list");
 const main_selector = document.getElementById("main-selector") as HTMLSelectElement;
@@ -16,20 +17,14 @@ function show_gui() {
     if(main_selector.value === "agenda") {
         main_list.innerHTML = show_agenda(tg);
     }
-    else {
-        main_list.innerHTML = "<li>Nothing to show here.</li>";
+    else if(main_selector.value === "all") {
+        main_list.innerHTML = show_all_tasks(tg);
     }
-
-    switch(main_selector.value) {
-        case "agenda":
-            main_list.innerHTML = show_agenda(tg);
-            break;
-        case "all":
-            main_list.innerHTML = show_all_tasks(tg);
-            break;
-        default:
-            console.error(`Unknown selector option: ${main_selector.value}`);
-            
+    else if(isProgress(main_selector.value)) {
+        main_list.innerHTML = show_all_tasks_by_progress(tg, main_selector.value);
+    }
+    else {
+        console.error(`Unknown selector option: ${main_selector.value}`);
     }
 
     main_list.scrollTop = main_list.scrollHeight;

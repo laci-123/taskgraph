@@ -1,4 +1,4 @@
-import { Task, compare_tasks } from "./task";
+import { Progress, Task, compare_tasks } from "./task";
 import { TaskGraph } from "./taskgraph";
 import { maybedate_to_string_or, compare_dates } from "./maybedate";
 
@@ -11,6 +11,12 @@ export function show_agenda(tg: TaskGraph): string {
 
 export function show_all_tasks(tg: TaskGraph): string {
     const tasks = tg.all_tasks;
+    tasks.sort(compare_tasks(new Date(), 2 * 24 * 60 * 60 * 1000));
+    return show_list(tasks);
+}
+
+export function show_all_tasks_by_progress(tg: TaskGraph, progress: Progress): string {
+    const tasks = tg.all_tasks_by_progress(progress);
     tasks.sort(compare_tasks(new Date(), 2 * 24 * 60 * 60 * 1000));
     return show_list(tasks);
 }
