@@ -19,6 +19,10 @@ export class TaskGraph {
         return tasks.filter((task) => task.progress === progress);
     }
 
+    public get_task_by_id(id: number): Task | undefined {
+        return this.tasks.get(id);
+    }
+
     public agenda(now: Date, close_to_deadline: number): Task[] {
         // Topoligical sort using an adapted version of Kahn's algorithm (https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm).
         // The main difference is that instead of keeping the nodes in a set,

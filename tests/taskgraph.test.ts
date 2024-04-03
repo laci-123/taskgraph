@@ -81,6 +81,24 @@ test("TaskGraph with multiple independent tasks constructs properly", () => {
     expect(task3.needed_by).toHaveLength(0);
 });
 
+test("get task by id", () => {
+    const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("2030-02-01"), priority: 5,  dependencies: [1, 2]},
+                              {id: 1, name: "buy some food",  deadline: new Date("2030-02-05"), priority: 8,  dependencies: [3]},
+                              {id: 2, name: "buy a stove",    deadline: new Date("2030-01-30"), priority: -1, dependencies: [3]},
+                              {id: 3, name: "get some money", deadline: "never",                priority: 0,  dependencies: []}]);
+
+    const task0 = tg.get_task_by_id(0);
+    expect(task0).toBeDefined();
+    expect(task0!.name).toEqual("cook lunch");
+
+    const task1 = tg.get_task_by_id(3);
+    expect(task1).toBeDefined();
+    expect(task1!.name).toEqual("get some money");
+
+    const task2 = tg.get_task_by_id(4);
+    expect(task2).not.toBeDefined();
+});
+
 test("deadlines and priorities propagate correctly (one root)", () => {
     //               +-----------"cook lunch" 2030-02-01 (+5) ---------+
     //               |                                                 |
