@@ -21,8 +21,29 @@ export function show_all_tasks_by_progress(tg: TaskGraph, progress: Progress): s
     return show_list(tasks);
 }
 
-function show_list(tasks: Task[]): string {
+export function show_task_details(task: Task): string {
     let result = "";
+
+    result += "<div id='task-details'>";
+    result += `<input type='text' id='task-name-input' value='${task.name}'></input>`;
+    result += `<label for='task-description-input' id='task-description-label'>Description:</label>`;
+    result += `<textarea id='task-description-input'>${task.description}</textarea>`;
+    if(task.deadline === "never") {
+        result += `<div><input type='checkbox' id='task-has-deadline-input'></input><label for='task-has-deadline-input'>Deadline</label></div>`;
+    }
+    else {
+        result += `<div><input type='checkbox' id='task-has-deadline-input' value='Deadline' checked></input><label for='task-has-deadline-input'>Deadline</label></div>`;
+        result += `<input type='date' id='task-deadline-input' value='${task.deadline.toISOString().split("T")[0]}'></input>`;
+    }
+    result += `<div id='task-priority-label'>Priority:</div>`;
+    result += `<input type='number' id='task-priority-input' value='${task.priority}' min='-100' max='100'></input>`;
+    result += "</div>";
+
+    return result;
+}
+
+function show_list(tasks: Task[]): string {
+    let result = "<ul id='main-list'>";
 
     for(let i = 0; i < 2; ++i) {
         result += "<li class='dummy-list-item'></li>";
@@ -31,16 +52,17 @@ function show_list(tasks: Task[]): string {
         const task = tasks[i];
         const effective_deadline = maybedate_to_string_or(task.effective_deadline, "-");
         const overdue_deadline_style = compare_dates(task.effective_deadline, new Date()) < 0 ? "task-deadline-overdue" : "";
-        result += "<li class='main-list-item'>";
+        result += `<li class='main-list-item' data-task-id='${task.id}'>`;
         result += `<div class='task-progress'>${task.progress.toString().toUpperCase()}</div>`;
         result += `<div class='task-name'>${task.name}</div>`;
         result += `<div class='task-deadline ${overdue_deadline_style}'>${effective_deadline}</div>`;
         result += `<div class='task-priority'>priority: ${task.priority}</div>`;
-        result += "</li>";
+        result += `</li>`;
     }
     for(let i = 0; i < 3; ++i) {
         result  += "<li class='dummy-list-item'></li>";
     }
+    result += "</ul>";
 
     return result;
 }

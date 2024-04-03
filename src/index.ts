@@ -1,8 +1,8 @@
 import {TaskGraph} from "./taskgraph";
-import { show_agenda, show_all_tasks, show_all_tasks_by_progress } from "./gui";
+import { show_agenda, show_all_tasks, show_all_tasks_by_progress, show_task_details } from "./gui";
 import { isProgress } from "./task";
 
-const main_list = document.getElementById("main-list");
+const content = document.getElementById("content");
 const main_selector = document.getElementById("main-selector") as HTMLSelectElement;
 
 const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("2024-04-13"), priority: 5,  dependencies: [1, 4]},
@@ -15,19 +15,28 @@ const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("20
 
 function show_gui() {
     if(main_selector.value === "agenda") {
-        main_list.innerHTML = show_agenda(tg);
+        content.innerHTML = show_agenda(tg);
     }
     else if(main_selector.value === "all") {
-        main_list.innerHTML = show_all_tasks(tg);
+        content.innerHTML = show_all_tasks(tg);
     }
     else if(isProgress(main_selector.value)) {
-        main_list.innerHTML = show_all_tasks_by_progress(tg, main_selector.value);
+        content.innerHTML = show_all_tasks_by_progress(tg, main_selector.value);
     }
     else {
         console.error(`Unknown selector option: ${main_selector.value}`);
     }
 
-    main_list.scrollTop = main_list.scrollHeight;
+    const list_items = Array.from(document.getElementsByClassName("main-list-item"));
+    for(const list_item of list_items) {
+        list_item.addEventListener("click", (_) => {
+            const task_id = parseInt((list_item as HTMLElement).dataset["taskId"]);
+            const task = tg.get_task_by_id(task_id);
+            content.innerHTML = show_task_details(task);
+        });
+    }
+
+    content.scrollTop = content.scrollHeight;
 }
 
 main_selector.addEventListener("change", show_gui);
