@@ -1,3 +1,89 @@
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
 body {
-    background-color: #001177;
+    display: grid;
+    grid-template: 1fr / 1fr;
+    place-items: center;
+    height: 100dvh;
+}
+
+body > * {
+    grid-column: 1 / 1;
+    grid-row: 1 / 1;
+    width: 100%;
+    height: 100%;
+}
+
+#controls {
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr 8fr 2fr;
+    grid-template-areas:
+        "main-menu sub-menu"
+        ".         ."
+        ".         new-task";
+    font-size: 5vw;
+}
+
+#main-menu {
+    grid-area: main-menu;
+    background-color: blue;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+#main-menu > *:first-child {
+    margin-left: 2vw;
+}
+
+#sub-menu {
+    grid-area: sub-menu;
+    background-color: green;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+#sub-menu > *:last-child {
+    margin-right: 2vw;
+}
+
+#new-task {
+    grid-area: new-task;
+    display: grid;
+    justify-items: center;
+    align-items: center;
+}
+
+#add-new-task {
+    height: 50%;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background-color: green;
+    font-size: 10vw;
+    border: none;
+}
+
+#content {
+    z-index: 1;
+    font-size: 5vw;
+}
+
+#main-list {
+    overflow-y: scroll;
+    max-height: 100%;
+}
+
+#main-list > li {
+    height: 20vh;
+    border: 1px solid red;
 }

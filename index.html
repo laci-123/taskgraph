@@ -8,10 +8,28 @@
         <title>TaskGraph</title>
     </head>
     <body>
-        <h1>TaskGraph</h1>
-
-        <button id="button">Gomb</button>
-        <div id="output"></div>
+        <div id="controls">
+            <div id="main-menu">
+                <select id="main-selector">
+                    <option value="agenda">Agenda</option>
+                    <option value="todo">All TODO tasks</option>
+                    <option value="blocked">All BLOCKED tasks</option>
+                    <option value="started">All STARTED tasks</option>
+                    <option value="finished">All FINISHED tasks</option>
+                    <option value="failed">All FAILED tasks</option>
+                    <option value="all">All tasks</option>
+                </select>
+            </div>
+            <div id="sub-menu">
+                <button>Do Something</button>
+            </div>
+            <div id="new-task">
+                <button id="add-new-task">+</button>
+            </div>
+        </div>
+        <div id="content">
+            <ul id="main-list"></ul>
+        </div>
 
         <script src="bundle.js"></script>
     </body>
