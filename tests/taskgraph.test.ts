@@ -3,12 +3,12 @@ import {TaskGraph} from "../src/taskgraph";
 
 test("empty TaskGraph has no tasks", () => {
     const tg = new TaskGraph([]);
-    expect(Array.from(tg.all_tasks)).toHaveLength(0);
+    expect(tg.all_tasks).toHaveLength(0);
 });
 
 test("TaskGraph with one task (with missing fields) constructs properly", () => {
     const tg = new TaskGraph([{id: 123, name: "do something", dependencies: []}]);
-    const tasks = Array.from(tg.all_tasks);
+    const tasks = tg.all_tasks;
     expect(tasks).toHaveLength(1);
     const task = tasks[0];
     expect(task.id).toBe(123)
@@ -33,7 +33,7 @@ test("TaskGraph with one task (without missing fields) constructs properly", () 
                                birthline: "never",
                                progress: "doing",
                                dependencies: []}]);
-    const tasks = Array.from(tg.all_tasks);
+    const tasks = tg.all_tasks;
     expect(tasks).toHaveLength(1);
     const task = tasks[0];
     expect(task.id).toBe(123)
@@ -53,7 +53,7 @@ test("TaskGraph with multiple independent tasks constructs properly", () => {
     const tg = new TaskGraph([{id: 1, name: "do something", dependencies: []},
                               {id: 2, name: "eat an apple", dependencies: []},
                               {id: 3, name: "go to sleep", dependencies: []}]);
-    const tasks = Array.from(tg.all_tasks);
+    const tasks = tg.all_tasks;
     expect(tasks).toHaveLength(3);
 
     const task1 = tasks[0];
@@ -94,7 +94,7 @@ test("deadlines and priorities propagate correctly (one root)", () => {
                               {id: 2, name: "buy a stove",    deadline: new Date("2030-01-30"), priority: -1, dependencies: [3]},
                               {id: 3, name: "get some money", deadline: "never",                priority: 0,  dependencies: []}]);
     
-    const tasks = Array.from(tg.all_tasks);
+    const tasks = tg.all_tasks;
     expect(tasks).toHaveLength(4);
 
     // "cook lunch" is not needed by any other task therefore it remains completely unchanged
@@ -160,7 +160,7 @@ test("deadlines and priorities propagate correctly (multiple roots)", () => {
                               {id: 2, name: "buy apples",     deadline: "never",                priority: 0,  dependencies: []},
                               {id: 3, name: "buy bananas",    deadline: "never",                priority: 0,  dependencies: []}]);
 
-    const tasks = Array.from(tg.all_tasks);
+    const tasks = tg.all_tasks;
     expect(tasks).toHaveLength(4);
 
     // "eat breakfast" is not needed by any other task therefore it remains completely unchanged
@@ -209,19 +209,19 @@ test("task is unblocked if and only if all of its dependencies are DONE", () => 
     const tg1 = new TaskGraph([{id: 0, name: "write a book",       dependencies: [1, 2], progress: "todo"},
                                {id: 1, name: "learn how to write", dependencies: [],     progress: "todo"},
                                {id: 2, name: "have a good idea",   dependencies: [],     progress: "todo"}]);
-    const tasks1 = Array.from(tg1.all_tasks);
+    const tasks1 = tg1.all_tasks;
     expect(tasks1[0].progress).toEqual("blocked");
 
     const tg2 = new TaskGraph([{id: 0, name: "write a book",       dependencies: [1, 2], progress: "todo"},
                                {id: 1, name: "learn how to write", dependencies: [],     progress: "done"},
                                {id: 2, name: "have a good idea",   dependencies: [],     progress: "todo"}]);
-    const tasks2 = Array.from(tg2.all_tasks);
+    const tasks2 = tg2.all_tasks;
     expect(tasks2[0].progress).toEqual("blocked");
 
     const tg3 = new TaskGraph([{id: 0, name: "write a book",       dependencies: [1, 2], progress: "todo"},
                                {id: 1, name: "learn how to write", dependencies: [],     progress: "done"},
                                {id: 2, name: "have a good idea",   dependencies: [],     progress: "done"}]);
-    const tasks3 = Array.from(tg3.all_tasks);
+    const tasks3 = tg3.all_tasks;
     expect(tasks3[0].progress).toEqual("todo");
 });
 
@@ -231,7 +231,7 @@ test("failure is propagated", () => {
                               {id: 2, name: "buy apples",     dependencies: [], progress: "failed"},
                               {id: 3, name: "buy bananas",    dependencies: []}]);
 
-    const tasks = Array.from(tg.all_tasks);
+    const tasks = tg.all_tasks;
     expect(tasks[3].progress).toEqual("todo");
     expect(tasks[2].progress).toEqual("failed");
     expect(tasks[1].progress).toEqual("failed");

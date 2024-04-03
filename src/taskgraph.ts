@@ -10,8 +10,8 @@ export class TaskGraph {
     // tasks that don't depend on any other tasks
     private roots = new Set<Task>();
 
-    public get all_tasks(): Iterable<Task> {
-        return this.tasks.values();
+    public get all_tasks(): Task[] {
+        return Array.from(this.tasks.values());
     }
 
     public agenda(now: Date, close_to_deadline: number): Task[] {

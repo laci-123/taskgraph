@@ -1,5 +1,5 @@
 import {TaskGraph} from "./taskgraph";
-import { show_agenda } from "./gui";
+import { show_agenda, show_all_tasks } from "./gui";
 
 const main_list = document.getElementById("main-list");
 const main_selector = document.getElementById("main-selector") as HTMLSelectElement;
@@ -12,7 +12,7 @@ const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("20
                           {id: 5, name: "fix the car",      deadline: "never",               priority: -1, dependencies: [], progress: "doing"},
                           {id: 6, name: "return library books", deadline: new Date("2023-04-1"), priority: 0, dependencies: [5]}]);
 
-main_selector.addEventListener("change", (_) => {
+function show_gui() {
     if(main_selector.value === "agenda") {
         main_list.innerHTML = show_agenda(tg);
     }
@@ -24,10 +24,17 @@ main_selector.addEventListener("change", (_) => {
         case "agenda":
             main_list.innerHTML = show_agenda(tg);
             break;
+        case "all":
+            main_list.innerHTML = show_all_tasks(tg);
+            break;
         default:
             console.error(`Unknown selector option: ${main_selector.value}`);
             
     }
-});
 
-main_list.innerHTML = show_agenda(tg);
+    main_list.scrollTop = main_list.scrollHeight;
+}
+
+main_selector.addEventListener("change", show_gui);
+
+show_gui();
