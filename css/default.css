@@ -33,6 +33,25 @@ body > * {
     margin-right: 5vw;
 } 
 
+#main-selector {
+    color: white;
+    background-color: green;
+    border: 1px solid white;
+    font-size: 2vh;
+    padding: 1vh;
+}
+
+#menu {
+    color: white;
+    background-color: green;
+    font-size: 4vh;
+    border: none;
+}
+
+#menu:after {
+    content: "\2807";
+}
+
 #bottom-controls {
     bottom: 0;
     right: 0;
