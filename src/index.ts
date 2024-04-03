@@ -1,8 +1,8 @@
-import { compare_dates, maybedate_to_string_or } from "./maybedate";
 import {TaskGraph} from "./taskgraph";
-
+import { show_agenda } from "./gui";
 
 const main_list = document.getElementById("main-list");
+const main_selector = document.getElementById("main-selector") as HTMLSelectElement;
 
 const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("2024-04-13"), priority: 5,  dependencies: [1, 4]},
                           {id: 1, name: "buy some food",  deadline: new Date("2024-04-15"), priority: 0,  dependencies: [3]},
@@ -12,27 +12,22 @@ const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("20
                           {id: 5, name: "fix the car",      deadline: "never",               priority: -1, dependencies: [], progress: "doing"},
                           {id: 6, name: "return library books", deadline: new Date("2023-04-1"), priority: 0, dependencies: [5]}]);
 
-if (main_list)
-{
-    const two_days = 2 * 24 * 60 * 60 * 1000;
-    const agenda = tg.agenda(new Date(), two_days);
+main_selector.addEventListener("change", (_) => {
+    if(main_selector.value === "agenda") {
+        main_list.innerHTML = show_agenda(tg);
+    }
+    else {
+        main_list.innerHTML = "<li>Nothing to show here.</li>";
+    }
 
-    for(let i = 0; i < 2; ++i) {
-        main_list.innerHTML += "<li class='dummy-list-item'></li>";
+    switch(main_selector.value) {
+        case "agenda":
+            main_list.innerHTML = show_agenda(tg);
+            break;
+        default:
+            console.error(`Unknown selector option: ${main_selector.value}`);
+            
     }
-    for(let i = agenda.length - 1; i >= 0; --i) {
-        const task = agenda[i];
-        const effective_deadline = maybedate_to_string_or(task.effective_deadline, "-");
-        const overdue_deadline_style = compare_dates(task.effective_deadline, new Date()) < 0 ? "task-deadline-overdue" : "";
-        let item = "<li class='main-list-item'>";
-        item += `<div class='task-progress'>${task.progress.toString().toUpperCase()}</div>`;
-        item += `<div class='task-name'>${task.name}</div>`;
-        item += `<div class='task-deadline ${overdue_deadline_style}'>${effective_deadline}</div>`;
-        item += `<div class='task-priority'>priority: ${task.priority}</div>`;
-        item += "</li>";
-        main_list.innerHTML += item;
-    }
-    for(let i = 0; i < 3; ++i) {
-        main_list.innerHTML += "<li class='dummy-list-item'></li>";
-    }
-}
+});
+
+main_list.innerHTML = show_agenda(tg);
