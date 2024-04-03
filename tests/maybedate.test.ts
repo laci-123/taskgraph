@@ -1,4 +1,4 @@
-import {compare_dates} from "../src/maybedate";
+import {compare_dates, maybedate_to_string_or} from "../src/maybedate";
 
 test("if neither date is 'never' then they compare like regular dates", () => {
     const x1 = new Date("2000-01-01");
@@ -28,4 +28,12 @@ test("every regular date is sooner than 'never'", () => {
     const x2 = "never";
     const y2 = new Date("2003-02-01");
     expect(compare_dates(x2, y2)).toBeGreaterThan(0);
+});
+
+test("converting to string", () => {
+    const x1 = new Date("2023-04-05");
+    expect(maybedate_to_string_or(x1, "-")).toEqual("2023-04-05");
+
+    const x2 = "never";
+    expect(maybedate_to_string_or(x2, "-")).toEqual("-");
 });

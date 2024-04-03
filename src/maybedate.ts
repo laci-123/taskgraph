@@ -1,5 +1,14 @@
 export type MaybeDate = Date | "never";
 
+export function maybedate_to_string_or(md: MaybeDate, never_representation: string) {
+    if(md === "never") {
+        return never_representation;
+    }
+    else {
+        return md.toISOString().split("T")[0];
+    }
+}
+
 export function get_time(md: MaybeDate): number {
     if(md === "never") {
         return Number.POSITIVE_INFINITY;

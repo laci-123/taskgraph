@@ -1,3 +1,4 @@
+import { maybedate_to_string_or } from "./maybedate";
 import {TaskGraph} from "./taskgraph";
 
 
@@ -19,7 +20,9 @@ if (button && output)
         const agenda = tg.agenda(new Date(), one_day);
         output.innerHTML += "<ol>";
         for(const task of agenda) {
-            output.innerHTML += `<li>${task.name}</li>`;
+            const effective_deadline = maybedate_to_string_or(task.effective_deadline, "-");
+            const deadline = maybedate_to_string_or(task.deadline, "-");
+            output.innerHTML += `<li>${task.name} | ${effective_deadline} (${deadline}) | ${task.effective_priority} (${task.priority})</li>`;
         }
         output.innerHTML += "</ol>";
     });
