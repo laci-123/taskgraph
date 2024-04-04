@@ -52,7 +52,7 @@ body > * {
     align-items: center;
 }
 
-#add-new-task {
+#floating-button {
     height: 50%;
     aspect-ratio: 1 / 1;
     border-radius: 50%;

@@ -5,6 +5,7 @@ import { isProgress } from "./task";
 const content = document.getElementById("content");
 const main_selector = document.getElementById("main-selector") as HTMLSelectElement;
 const back_button = document.getElementById("back-button");
+const floating_button = document.getElementById("floating-button");
 
 const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("2024-04-13"), priority: 5,  dependencies: [1, 4]},
                           {id: 1, name: "buy some food",  deadline: new Date("2024-04-15"), priority: 0,  dependencies: [3]},
@@ -27,6 +28,7 @@ function show_main_selector() {
 function show_previous_page() {
     show_main_selector();
     show_gui();
+    floating_button.innerHTML = "+";
 }
 
 function show_gui() {
@@ -50,6 +52,7 @@ function show_gui() {
             const task = tg.get_task_by_id(task_id);
             content.innerHTML = show_task_details(task);
             show_back_button();
+            floating_button.innerHTML = "&#10003;";
             window.history.pushState(null, "");
         });
     }
