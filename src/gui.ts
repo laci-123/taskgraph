@@ -1,4 +1,4 @@
-import { Progress, Task, compare_tasks } from "./task";
+import { Progress, Task, compare_tasks, progress_type_values } from "./task";
 import { TaskGraph } from "./taskgraph";
 import { maybedate_to_string_or, compare_dates } from "./maybedate";
 
@@ -25,9 +25,30 @@ export function show_task_details(task: Task): string {
     let result = "";
 
     result += "<div id='task-details'>";
+
+    // name
     result += `<input type='text' id='task-name-input' value='${task.name}'></input>`;
+
+    // progress
+    result += "<div id='task-progress-group'>";
+    result += `<label for='task-progress-input' id='task-progress-label'>Progress:</label>`;
+    if(task.progress === "blocked") {
+        result += "<div id='task-progress-input-disabled'>BLOCKED</div>";
+    }
+    else {
+        const progress_options = progress_type_values.map((v) => `<option value='${v}' ${v === task.progress ? "selected='selected'" : ""}>${v.toUpperCase()}</option>`).join("");
+        result += `<select id='task-progress-input'>${progress_options}</select>`;
+    }
+    result += "</div>";
+
+    // description
+    result += "<div id='task-description-group'>";
     result += `<label for='task-description-input' id='task-description-label'>Description:</label>`;
-    result += `<textarea id='task-description-input'>${task.description}</textarea>`;
+    result += `<textarea id='task-description-input' cols='100' rows='3'>${task.description}</textarea>`;
+    result += "</div>";
+
+    // deadline
+    result += "<div>";
     if(task.deadline === "never") {
         result += `<div><input type='checkbox' id='task-has-deadline-input'></input><label for='task-has-deadline-input'>Deadline</label></div>`;
     }
@@ -35,8 +56,17 @@ export function show_task_details(task: Task): string {
         result += `<div><input type='checkbox' id='task-has-deadline-input' value='Deadline' checked></input><label for='task-has-deadline-input'>Deadline</label></div>`;
         result += `<input type='date' id='task-deadline-input' value='${task.deadline.toISOString().split("T")[0]}'></input>`;
     }
+    if(task.effective_deadline !== task.deadline && task.effective_deadline !== "never") {
+        result += `<div id='task-effective-deadline-label'>Computed: ${task.effective_deadline.toISOString().split("T")[0]}</div>`;
+    }
+    result += "</div>";
+
+    // priority
+    result += "<div>";
     result += `<div id='task-priority-label'>Priority:</div>`;
     result += `<input type='number' id='task-priority-input' value='${task.priority}' min='-100' max='100'></input>`;
+    result += "</div>";
+
     result += "</div>";
 
     return result;

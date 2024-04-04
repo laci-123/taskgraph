@@ -24,6 +24,11 @@ function show_main_selector() {
     back_button.classList.add("not-shown");
 }
 
+function show_previous_page() {
+    show_main_selector();
+    show_gui();
+}
+
 function show_gui() {
     if(main_selector.value === "agenda") {
         content.innerHTML = show_agenda(tg);
@@ -51,11 +56,6 @@ function show_gui() {
 
     const main_list = document.getElementById("main-list");
     main_list.scrollTop = main_list.scrollHeight;
-}
-
-function show_previous_page() {
-    show_main_selector();
-    show_gui();
 }
 
 main_selector.addEventListener("change", show_gui);

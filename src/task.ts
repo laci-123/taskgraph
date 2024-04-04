@@ -1,12 +1,12 @@
 import {MaybeDate, compare_dates, get_time} from "./maybedate";
 
 
-const progress = ["blocked", "todo", "doing", "done", "failed"] as const;
+export const progress_type_values = ["blocked", "todo", "doing", "done", "failed"] as const;
 
-export type Progress  = (typeof progress)[number];
+export type Progress  = (typeof progress_type_values)[number];
 
 export function isProgress(x: any): x is Progress {
-    return progress.includes(x);
+    return progress_type_values.includes(x);
 }
 
 export interface RawTask {
