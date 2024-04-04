@@ -2,6 +2,10 @@ import {TaskGraph} from "./taskgraph";
 import { show_agenda, show_all_tasks, show_all_tasks_by_progress, show_task_details } from "./gui";
 import { Task, isProgress } from "./task";
 
+
+type Page = "main" | "task-details";
+type PageState = {page: Page, task_id?: number};
+
 const content = document.getElementById("content");
 const main_selector = document.getElementById("main-selector") as HTMLSelectElement;
 const back_button = document.getElementById("back-button");
@@ -15,10 +19,10 @@ const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("20
                           {id: 5, name: "fix the car",      deadline: "never",               priority: -1, dependencies: [], progress: "doing"},
                           {id: 6, name: "return library books", deadline: new Date("2023-04-1"), priority: 0, dependencies: [5]}]);
 
-function show_create_new_task(): string {
+function show_create_new_task(): [string, number] {
     const new_id = tg.smallest_available_id;
     const new_task = new Task(new_id, "");
-    return show_task_details(new_task, ["todo", "doing"]);
+    return [show_task_details(new_task, ["todo", "doing"]), new_id];
 }
 
 function show_back_button() {
@@ -31,12 +35,6 @@ function show_main_selector() {
     back_button.classList.add("not-shown");
 }
 
-function show_previous_page() {
-    show_main_selector();
-    show_gui();
-    floating_button.innerHTML = "+";
-}
-
 function add_task_id_links() {
     const dep_buttons = Array.from(document.getElementsByClassName("dependency-list-item"));
     for(const dep_button of dep_buttons) {
@@ -46,7 +44,7 @@ function add_task_id_links() {
             const task = tg.get_task_by_id(task_id);
             content.innerHTML = show_task_details(task, ["todo", "doing", "done", "failed"]);
             add_task_id_links();
-            window.history.pushState(null, "");
+            window.history.pushState({page: "task-details", task_id: task_id}, "");
         });
     }
 }
@@ -74,24 +72,38 @@ function show_gui() {
             show_back_button();
             add_task_id_links();
             floating_button.innerHTML = "&#10003;";
-            window.history.pushState(null, "");
+            window.history.pushState({page: "task-details", task_id: task_id}, "");
         });
     }
     
     const main_list = document.getElementById("main-list");
     main_list.scrollTop = main_list.scrollHeight;
+    window.history.pushState({page: "main"}, "");
 }
 
 floating_button.addEventListener("click", (_) => {
     if(floating_button.innerHTML === "+") {
-        content.innerHTML = show_create_new_task();
+        const [cnt, new_task_id] = show_create_new_task();
+        content.innerHTML = cnt;
         show_back_button();
         floating_button.innerHTML = "&#10003;";
-        window.history.pushState(null, "");
+        window.history.pushState({page: "task-details", task_id: new_task_id}, "");
     }
 });
 main_selector.addEventListener("change", show_gui);
-back_button.addEventListener("click", show_previous_page);
-window.addEventListener("popstate", show_previous_page);
+back_button.addEventListener("click", (_) => window.history.back());
+window.addEventListener("popstate", (e) => {
+    const state = e.state as PageState;
+    if(state.page === "main") {
+        floating_button.innerHTML = "+";
+        show_gui();
+        show_main_selector();
+    }
+    else if(state.page === "task-details") {
+        floating_button.innerHTML = "&#10003;";
+        content.innerHTML = show_task_details(tg.get_task_by_id(state.task_id), ["todo", "doing", "done", "failed"]);
+        show_back_button();
+    }
+});
 
 show_gui();
