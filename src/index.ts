@@ -37,6 +37,20 @@ function show_previous_page() {
     floating_button.innerHTML = "+";
 }
 
+function add_task_id_links() {
+    const dep_buttons = Array.from(document.getElementsByClassName("dependency-list-item"));
+    for(const dep_button of dep_buttons) {
+        dep_button.addEventListener("click", (_) => {
+            const parent = dep_button.parentNode as HTMLElement;
+            const task_id = parseInt(parent.dataset["taskId"]);
+            const task = tg.get_task_by_id(task_id);
+            content.innerHTML = show_task_details(task, ["todo", "doing", "done", "failed"]);
+            add_task_id_links();
+            window.history.pushState(null, "");
+        });
+    }
+}
+
 function show_gui() {
     if(main_selector.value === "agenda") {
         content.innerHTML = show_agenda(tg);
@@ -58,11 +72,12 @@ function show_gui() {
             const task = tg.get_task_by_id(task_id);
             content.innerHTML = show_task_details(task, ["todo", "doing", "done", "failed"]);
             show_back_button();
+            add_task_id_links();
             floating_button.innerHTML = "&#10003;";
             window.history.pushState(null, "");
         });
     }
-
+    
     const main_list = document.getElementById("main-list");
     main_list.scrollTop = main_list.scrollHeight;
 }
