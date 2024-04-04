@@ -1,6 +1,6 @@
 import {TaskGraph} from "./taskgraph";
 import { show_agenda, show_all_tasks, show_all_tasks_by_progress, show_task_details } from "./gui";
-import { isProgress } from "./task";
+import { Task, isProgress } from "./task";
 
 const content = document.getElementById("content");
 const main_selector = document.getElementById("main-selector") as HTMLSelectElement;
@@ -14,6 +14,12 @@ const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("20
                           {id: 4, name: "learn how to cook [The quick brown fox jumps over the lazy dog.]", deadline: "never",              priority: 0, dependencies: []},
                           {id: 5, name: "fix the car",      deadline: "never",               priority: -1, dependencies: [], progress: "doing"},
                           {id: 6, name: "return library books", deadline: new Date("2023-04-1"), priority: 0, dependencies: [5]}]);
+
+function show_create_new_task(): string {
+    const new_id = tg.smallest_available_id;
+    const new_task = new Task(new_id, "");
+    return show_task_details(new_task, ["todo", "doing"]);
+}
 
 function show_back_button() {
     main_selector.classList.add("not-shown");
@@ -50,7 +56,7 @@ function show_gui() {
         list_item.addEventListener("click", (_) => {
             const task_id = parseInt((list_item as HTMLElement).dataset["taskId"]);
             const task = tg.get_task_by_id(task_id);
-            content.innerHTML = show_task_details(task);
+            content.innerHTML = show_task_details(task, ["todo", "doing", "done", "failed"]);
             show_back_button();
             floating_button.innerHTML = "&#10003;";
             window.history.pushState(null, "");
@@ -61,6 +67,14 @@ function show_gui() {
     main_list.scrollTop = main_list.scrollHeight;
 }
 
+floating_button.addEventListener("click", (_) => {
+    if(floating_button.innerHTML === "+") {
+        content.innerHTML = show_create_new_task();
+        show_back_button();
+        floating_button.innerHTML = "&#10003;";
+        window.history.pushState(null, "");
+    }
+});
 main_selector.addEventListener("change", show_gui);
 back_button.addEventListener("click", show_previous_page);
 window.addEventListener("popstate", show_previous_page);

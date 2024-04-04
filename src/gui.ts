@@ -21,13 +21,13 @@ export function show_all_tasks_by_progress(tg: TaskGraph, progress: Progress): s
     return show_list(tasks);
 }
 
-export function show_task_details(task: Task): string {
+export function show_task_details(task: Task, enabled_progresses: Progress[]): string {
     let result = "";
 
     result += "<div id='task-details'>";
 
     // name
-    result += `<input type='text' id='task-name-input' value='${task.name}'></input>`;
+    result += `<input type='text' id='task-name-input' value='${task.name}' placeholder='Task name'></input>`;
 
     // progress
     result += "<div id='task-progress-group'>";
@@ -36,7 +36,11 @@ export function show_task_details(task: Task): string {
         result += "<div id='task-progress-input-disabled'>BLOCKED</div>";
     }
     else {
-        const progress_options = progress_type_values.map((v) => `<option value='${v}' ${v === task.progress ? "selected='selected'" : ""}>${v.toUpperCase()}</option>`).join("");
+        const progress_options = progress_type_values.map((v) => 
+            enabled_progresses.includes(v) ?
+                `<option value='${v}' ${v === task.progress ? "selected='selected'" : ""}>${v.toUpperCase()}</option>` :
+                ""
+        ).join("");
         result += `<select id='task-progress-input'>${progress_options}</select>`;
     }
     result += "</div>";
