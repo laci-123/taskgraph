@@ -54,14 +54,17 @@ body > * {
 
 #floating-button {
     height: 50%;
-    aspect-ratio: 1 / 1;
-    border-radius: 50%;
     color: white;
     background-color: green;
     font-size: 8vh;
     border: none;
     margin-right: 5vw;
     padding: 0;
+}
+
+.circular {
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -134,12 +137,35 @@ body > * {
     color: gray;
 }
 
-#task-progress-input {
+.task-select-box {
     color: black;
     background-color: white;
     border: 1px solid black;
     font-size: 2vh;
     padding: 1vh;
+}
+
+.dependency-list-item {
+    color: black;
+    background-color: white;
+    border: 1px solid black;
+    padding: 0.5vh;
+    margin-bottom: 1vh;
+    box-shadow: 2px 2px gray;
+    flex-shrink: 2;
+}
+
+.remove-dependency {
+    color: red;
+    background-color: white;
+    border: none;
+    font-size: 150%;
+    padding: 0;
+}
+
+#task-add-dependency {
+    align-self: start;
+    padding: 0.5em;
 }
 
 #task-progress-input-disabled {
@@ -149,14 +175,14 @@ body > * {
     padding: 1vh;
 }
 
-#task-progress-group {
+.task-horizontal-group {
     display: flex;
     flex-direction: row;
     gap: 1em;
     align-items: baseline;
 }
 
-#task-description-group {
+.task-vertical-group {
     display: flex;
     flex-direction: column;
 }

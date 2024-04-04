@@ -30,7 +30,7 @@ export function show_task_details(task: Task, enabled_progresses: Progress[]): s
     result += `<input type='text' id='task-name-input' value='${task.name}' placeholder='Task name'></input>`;
 
     // progress
-    result += "<div id='task-progress-group'>";
+    result += "<div class='task-horizontal-group'>";
     result += `<label for='task-progress-input' id='task-progress-label'>Progress:</label>`;
     if(task.progress === "blocked") {
         result += "<div id='task-progress-input-disabled'>BLOCKED</div>";
@@ -41,12 +41,12 @@ export function show_task_details(task: Task, enabled_progresses: Progress[]): s
                 `<option value='${v}' ${v === task.progress ? "selected='selected'" : ""}>${v.toUpperCase()}</option>` :
                 ""
         ).join("");
-        result += `<select id='task-progress-input'>${progress_options}</select>`;
+        result += `<select id='task-progress-input' class='task-select-box'>${progress_options}</select>`;
     }
     result += "</div>";
 
     // description
-    result += "<div id='task-description-group'>";
+    result += "<div class='task-vertical-group'>";
     result += `<label for='task-description-input' id='task-description-label'>Description:</label>`;
     result += `<textarea id='task-description-input' cols='100' rows='3'>${task.description}</textarea>`;
     result += "</div>";
@@ -69,6 +69,16 @@ export function show_task_details(task: Task, enabled_progresses: Progress[]): s
     result += "<div>";
     result += `<div id='task-priority-label'>Priority:</div>`;
     result += `<input type='number' id='task-priority-input' value='${task.priority}' min='-100' max='100'></input>`;
+    result += "</div>";
+
+    // dependencies
+    result += "<div class='task-vertical-group' id='task-dependencies-group'>";
+    result += `<div id='task-dependencies-label'>Dependencies:</div>`;
+    const dep_options = task.depends_on.map((d) =>
+        `<li data-task-id='${d.id}' class='task-horizontal-group'><button class='dependency-list-item'>${d.name}</button><button class='remove-dependency'>x</button></li>`)
+        .join("");
+    result += `<ul id='task-dependencies-input''>${dep_options}</ul>`;
+    result += `<button id='task-add-dependency'>Add</button>`;
     result += "</div>";
 
     result += "</div>";
