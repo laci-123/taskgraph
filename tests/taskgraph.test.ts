@@ -367,3 +367,20 @@ test("agenda lists tasks in right order", () => {
     expect(agenda4[2].name).toEqual("go shopping");
     expect(agenda4[3].name).toEqual("buy bus pass");
 });
+
+test("smallest available id", () => {
+    const tg0 = new TaskGraph([]);
+    expect(tg0.smallest_available_id).toEqual(0);
+
+    const tg1 = new TaskGraph([{id: 0, name: "a"}]);
+    expect(tg1.smallest_available_id).toEqual(1);
+
+    const tg2 = new TaskGraph([{id: 10, name: "a"}]);
+    expect(tg2.smallest_available_id).toEqual(0);
+
+    const tg3 = new TaskGraph([{id: 0, name: "a"}, {id: 1, name: "b"}, {id: 2, name: "c"}]);
+    expect(tg3.smallest_available_id).toEqual(3);
+
+    const tg4 = new TaskGraph([{id: 0, name: "a"}, {id: 1, name: "b"}, {id: 2, name: "c"}, {id: 4, name: "e"}]);
+    expect(tg4.smallest_available_id).toEqual(3);
+});

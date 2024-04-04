@@ -10,6 +10,22 @@ export class TaskGraph {
     // tasks that don't depend on any other tasks
     private roots = new Set<Task>();
 
+    public get smallest_available_id(): number {
+        const ids = Array.from(this.tasks.keys());
+        const seen = new Set<number>();
+
+        for(const id of ids) {
+            seen.add(id);
+        }
+        for(let i = 0; i <= ids.length; ++i) {
+            if(!seen.has(i)) {
+                return i;
+            }
+        }
+
+        return 0;
+    }
+
     public get all_tasks(): Task[] {
         return Array.from(this.tasks.values());
     }
@@ -64,7 +80,7 @@ export class TaskGraph {
             // effective priority and effective deadline are by default the same as priority and deadline
             const task = new Task(rt.id, rt.name, rt.description, rt.priority, rt.deadline, rt.priority, rt.deadline, rt.birthline, rt.progress);
             this.tasks.set(rt.id, task);
-            if(rt.dependencies.length === 0) {
+            if(!rt.dependencies || rt.dependencies.length === 0) {
                 this.roots.add(task);
             }
             colors.set(task, "white");
@@ -73,6 +89,8 @@ export class TaskGraph {
 
         // connect dependent tasks
         for(const rt of raw_tasks) {
+            if(!rt.dependencies) continue;
+            
             const task = this.tasks.get(rt.id);
             for(const dep_id of rt.dependencies) {
                 const dep_task = this.tasks.get(dep_id);
