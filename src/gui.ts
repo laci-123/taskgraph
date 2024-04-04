@@ -81,6 +81,15 @@ export function show_task_details(task: Task, enabled_progresses: Progress[]): s
     result += `<button id='task-add-dependency'>Add</button>`;
     result += "</div>";
 
+    // users
+    result += "<div class='task-vertical-group' id='task-dependencies-group'>";
+    result += `<div id='task-users-label'>Other tasks that depend on this one:</div>`;
+    const user_options = task.needed_by.map((u) =>
+        `<li data-task-id='${u.id}' class='task-horizontal-group'><button class='dependency-list-item'>${u.name}</button></li>`)
+        .join("");
+    result += `<ul id='task-users-input''>${user_options}</ul>`;
+    result += "</div>";
+
     result += "</div>";
 
     return result;
