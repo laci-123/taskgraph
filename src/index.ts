@@ -4,6 +4,7 @@ import { isProgress } from "./task";
 
 const content = document.getElementById("content");
 const main_selector = document.getElementById("main-selector") as HTMLSelectElement;
+const back_button = document.getElementById("back-button");
 
 const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("2024-04-13"), priority: 5,  dependencies: [1, 4]},
                           {id: 1, name: "buy some food",  deadline: new Date("2024-04-15"), priority: 0,  dependencies: [3]},
@@ -12,6 +13,16 @@ const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("20
                           {id: 4, name: "learn how to cook [The quick brown fox jumps over the lazy dog.]", deadline: "never",              priority: 0, dependencies: []},
                           {id: 5, name: "fix the car",      deadline: "never",               priority: -1, dependencies: [], progress: "doing"},
                           {id: 6, name: "return library books", deadline: new Date("2023-04-1"), priority: 0, dependencies: [5]}]);
+
+function show_back_button() {
+    main_selector.classList.add("not-shown");
+    back_button.classList.remove("not-shown");
+}
+
+function show_main_selector() {
+    main_selector.classList.remove("not-shown");
+    back_button.classList.add("not-shown");
+}
 
 function show_gui() {
     if(main_selector.value === "agenda") {
@@ -33,12 +44,22 @@ function show_gui() {
             const task_id = parseInt((list_item as HTMLElement).dataset["taskId"]);
             const task = tg.get_task_by_id(task_id);
             content.innerHTML = show_task_details(task);
+            show_back_button();
+            window.history.pushState(null, "");
         });
     }
 
-    content.scrollTop = content.scrollHeight;
+    const main_list = document.getElementById("main-list");
+    main_list.scrollTop = main_list.scrollHeight;
+}
+
+function show_previous_page() {
+    show_main_selector();
+    show_gui();
 }
 
 main_selector.addEventListener("change", show_gui);
+back_button.addEventListener("click", show_previous_page);
+window.addEventListener("popstate", show_previous_page);
 
 show_gui();

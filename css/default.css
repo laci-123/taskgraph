@@ -26,14 +26,6 @@ body > * {
     padding: 2vh;
 }
 
-/* #top-controls > *:first-child {
-   margin-left: 5vw;
-   } 
-
-   #top-controls > *:last-child {
-   margin-right: 5vw;
-   } 
- */
 #main-selector {
     color: white;
     background-color: green;
@@ -42,15 +34,11 @@ body > * {
     padding: 1vh;
 }
 
-#menu {
+.top-controls-button {
     color: white;
     background-color: green;
-    font-size: 4vh;
+    font-size: 5vh;
     border: none;
-}
-
-#menu:after {
-    content: "\2807";
 }
 
 #bottom-controls {
@@ -147,4 +135,8 @@ body > * {
 
 #task-priority-label {
     margin-top: 2vh;
+}
+
+.not-shown {
+    display: none;
 }
