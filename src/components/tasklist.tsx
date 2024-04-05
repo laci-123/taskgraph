@@ -16,7 +16,7 @@ function task_to_list_item(task: Task): ReactElement {
             <div className={`task-deadline ${is_maybedate_overdue(task.effective_deadline, now) ? "task-deadline-overdue" : ""}`}>
                 {maybedate_to_string_or(task.effective_deadline, "-")}
             </div>
-            <div className="task-priority">{task.priority}</div>
+            <div className="task-priority">{`priority: ${task.priority}`}</div>
         </li>
     );
 }

@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { ReactElement, useState } from "react";
 import { Task } from "./task";
 import { TaskGraph } from "./taskgraph";
 import FloatingButton from "./components/floating_button";
@@ -28,15 +28,21 @@ function task_list(k: MainSelectorOptionKeys): Task[] {
     }
 }
 
+interface AppState {
+    which_task_list: MainSelectorOptionKeys;
+}
+
 export default function App(): ReactElement {
+    const [state, setState] = useState<AppState>({which_task_list: "agenda"});
+    
     return (
         <>
             <div className="top-controls">
-                <MainSelector selected="agenda" />
+                <MainSelector selected={state.which_task_list} handleChange={(e) => setState({which_task_list: e})} />
                 <SettingsButton />
             </div>
             <div className="content">
-            <TaskList tasks={task_list("all")}/>
+            <TaskList tasks={task_list(state.which_task_list)}/>
             </div>
             <div className="bottom-controls">
                 <FloatingButton role="add-task" onClick={() => {}} />
