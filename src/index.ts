@@ -6,10 +6,11 @@ import { Task, isProgress } from "./task";
 type Page = "main" | "task-details";
 type PageState = {page: Page, task_id?: number};
 
-const content = document.getElementById("content");
-const main_selector = document.getElementById("main-selector") as HTMLSelectElement;
-const back_button = document.getElementById("back-button");
-const floating_button = document.getElementById("floating-button");
+// All these elements are defined in index.html so they definitely exist
+const content = document.getElementById("content")!;
+const main_selector = document.getElementById("main-selector")! as HTMLSelectElement;
+const back_button = document.getElementById("back-button")!;
+const floating_button = document.getElementById("floating-button")!;
 
 const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("2024-04-13"), priority: 5,  dependencies: [1, 4]},
                           {id: 1, name: "buy some food",  deadline: new Date("2024-04-15"), priority: 0,  dependencies: [3]},
@@ -40,8 +41,8 @@ function add_task_id_links() {
     for(const dep_button of dep_buttons) {
         dep_button.addEventListener("click", (_) => {
             const parent = dep_button.parentNode as HTMLElement;
-            const task_id = parseInt(parent.dataset["taskId"]);
-            const task = tg.get_task_by_id(task_id);
+            const task_id = parseInt(parent.dataset["taskId"]!); // show_task_details() sets the data-task-id attribute...
+            const task = tg.get_task_by_id(task_id)!; // ... and we assume it points it to an existing task
             content.innerHTML = show_task_details(task, ["todo", "doing", "done", "failed"]);
             add_task_id_links();
             window.history.pushState({page: "task-details", task_id: task_id}, "");
@@ -66,8 +67,8 @@ function show_gui() {
     const list_items = Array.from(document.getElementsByClassName("main-list-item"));
     for(const list_item of list_items) {
         list_item.addEventListener("click", (_) => {
-            const task_id = parseInt((list_item as HTMLElement).dataset["taskId"]);
-            const task = tg.get_task_by_id(task_id);
+            const task_id = parseInt((list_item as HTMLElement).dataset["taskId"]!); // show_task_details() sets the data-task-id attribute...
+            const task = tg.get_task_by_id(task_id)!; // ... and we assume it points it to an existing task
             content.innerHTML = show_task_details(task, ["todo", "doing", "done", "failed"]);
             show_back_button();
             add_task_id_links();
@@ -76,7 +77,7 @@ function show_gui() {
         });
     }
     
-    const main_list = document.getElementById("main-list");
+    const main_list = document.getElementById("main-list")!; // main-list element is created by show_agenda(), show_all_tasks() or show_all_tasks_by_progress()
     main_list.scrollTop = main_list.scrollHeight;
     window.history.pushState({page: "main"}, "");
 }
@@ -99,10 +100,18 @@ window.addEventListener("popstate", (e) => {
         show_gui();
         show_main_selector();
     }
-    else if(state.page === "task-details") {
-        floating_button.innerHTML = "&#10003;";
-        content.innerHTML = show_task_details(tg.get_task_by_id(state.task_id), ["todo", "doing", "done", "failed"]);
-        show_back_button();
+    else if(state.page === "task-details" && state.task_id) {
+        const task = tg.get_task_by_id(state.task_id);
+        if (task) {
+            floating_button.innerHTML = "&#10003;";
+            content.innerHTML = show_task_details(task, ["todo", "doing", "done", "failed"]);
+            show_back_button();
+        }
+        else {
+            floating_button.innerHTML = "+";
+            show_gui();
+            show_main_selector();
+        }
     }
 });
 

@@ -54,12 +54,12 @@ export class TaskGraph {
         const L = new Array<Task>();
 
         while(S.size() > 0) {
-            const n = S.poll();
+            const n = S.poll()!; // S.poll() always returns an element because we just checked that S.size() > 0
             if(n.progress === "todo" || n.progress === "doing") {
                 L.push(n);
             }
             for(const m of n.needed_by) {
-                indegrees.set(m.id, indegrees.get(m.id) - 1);
+                indegrees.set(m.id, indegrees.get(m.id)! - 1); // we assume the constructor set indegrees properly so that it has a value for all ids
                 if(indegrees.get(m.id) === 0) {
                     S.add(m);
                 }
@@ -91,7 +91,7 @@ export class TaskGraph {
         for(const rt of raw_tasks) {
             if(!rt.dependencies) continue;
             
-            const task = this.tasks.get(rt.id);
+            const task = this.tasks.get(rt.id)!; // the previous loop set a value for all ids in this.tasks
             for(const dep_id of rt.dependencies) {
                 const dep_task = this.tasks.get(dep_id);
                 if(!dep_task) {
@@ -99,7 +99,7 @@ export class TaskGraph {
                 }
                 task.depends_on.push(dep_task);
                 dep_task.needed_by.push(task);
-                const indegree = this.indegrees.get(rt.id);
+                const indegree = this.indegrees.get(rt.id)!; // the previous loop set a value for all ids in this.indegrees
                 this.indegrees.set(rt.id, indegree + 1);
             }
         }
