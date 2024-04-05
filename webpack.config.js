@@ -2,12 +2,12 @@ const path = require('path');
 const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-    entry: './src/index.ts',
+    entry: './src/index.tsx',
     devtool: false,
     module: {
         rules: [
             {
-                test: /\.ts/,
+                test: /\.tsx?/,
                 use: {
                     loader: 'ts-loader',
                     options: {
@@ -26,7 +26,7 @@ module.exports = {
         }),
     ],
     resolve: {
-        extensions: ['.ts'],
+        extensions: ['.tsx', '.ts'],
     },
     output: {
         filename: 'bundle.js',
