@@ -86,11 +86,17 @@ body {
 
 .task-list > li {
     height: 20vh;
-}
-
-.task-list-item {
     padding: 1vh;
     border-top: 1px solid gray;
+}
+
+.task-list > li:first-child {
+    margin-top: 20vh;
+}
+
+.task-list > li:last-child {
+    margin-bottom: 40vh;
+    border-bottom: 1px solid gray;
 }
 
 .task-progress {

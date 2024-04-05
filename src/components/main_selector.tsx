@@ -2,22 +2,22 @@ import { ReactElement } from "react";
 import { Progress, progress_type_values } from "../task";
 
 
-type OptionKeys = Progress | "agenda" | "all";
+export type MainSelectorOptionKeys = Progress | "agenda" | "all";
 
 interface MainSelectorProps {
-    selected: OptionKeys;
+    selected: MainSelectorOptionKeys;
 }
 
 const options = [["agenda", "Agenda"],
-                 ...progress_type_values.map((v) => [`v`, `All ${v.toUpperCase()} tasks`]),
+                 ...progress_type_values.map((v) => [`${v}`, `All ${v.toUpperCase()} tasks`]),
                  ["all", "All tasks"]];
 
 
 export default function MainSelector(props: MainSelectorProps): ReactElement {
     return (
-        <select className="main-selector">
+        <select className="main-selector" defaultValue={props.selected}>
             {
-                options.map(([k, v]) => <option value={k} selected={k === props.selected}>
+                options.map(([k, v]) => <option key={k} value={k}>
                                             {v}
                                         </option>)
             }

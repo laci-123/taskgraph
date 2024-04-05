@@ -1,5 +1,9 @@
 export type MaybeDate = Date | "never";
 
+export function is_maybedate_overdue(md: MaybeDate, now: Date) {
+    return compare_dates(md, now) <= 0;
+}
+
 export function maybedate_to_string_or(md: MaybeDate, never_representation: string) {
     if(md === "never") {
         return never_representation;
