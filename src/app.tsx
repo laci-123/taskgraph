@@ -3,8 +3,9 @@ import { Task } from "./task";
 import { TaskGraph } from "./taskgraph";
 import FloatingButton from "./components/floating_button";
 import MainSelector, { MainSelectorOptionKeys } from "./components/main_selector";
-import SettingsButton from "./components/settings_button";
+import TopControlsButton from "./components/topcontrols_button";
 import TaskList from "./components/tasklist";
+import TaskDetails from "./components/task_details";
 
 
 const tg = new TaskGraph([{id: 0, name: "cook lunch",                                                       deadline: new Date("2024-04-13"), priority: 5,  dependencies: [1, 4]},
@@ -28,21 +29,36 @@ function task_list(k: MainSelectorOptionKeys): Task[] {
     }
 }
 
-interface AppState {
+type AppState = {
+    page: "main";
     which_task_list: MainSelectorOptionKeys;
-}
+} | {
+    page: "task-details";
+    task_id: number;
+};
 
 export default function App(): ReactElement {
-    const [state, setState] = useState<AppState>({which_task_list: "agenda"});
+    const [state, setState] = useState<AppState>({page: "main", which_task_list: "agenda"});
     
     return (
         <>
             <div className="top-controls">
-                <MainSelector selected={state.which_task_list} handleChange={(e) => setState({which_task_list: e})} />
-                <SettingsButton />
+                {
+                    state.page === "main"
+                    ?
+                    <MainSelector selected={state.which_task_list} handleChange={(e) => setState({page: "main", which_task_list: e})} />
+                    :
+                    <TopControlsButton text="⚙"/>
+                }
             </div>
             <div className="content">
-            <TaskList tasks={task_list(state.which_task_list)}/>
+            {
+                state.page === "main"
+                ?
+                <TaskList tasks={task_list(state.which_task_list)} handleTaskClick={(id) => setState({page: "task-details", task_id: id})} />
+                :
+                <TaskDetails task={tg.get_task_by_id(state.task_id)!} enabled_progresses={["todo", "doing", "done", "failed"]}/>
+            }
             </div>
             <div className="bottom-controls">
                 <FloatingButton role="add-task" onClick={() => {}} />
