@@ -16,12 +16,14 @@ interface EditorState {
     name: string;
     deadline: MaybeDate;
     priority: number;
+    description: string;
 }
 
 export default function TaskDetails(props: TaskDetailsProps): ReactElement {
     const [state, setState] = useState<EditorState>({name: props.task.name,
                                                      deadline: props.task.deadline,
-                                                     priority: props.task.priority});
+                                                     priority: props.task.priority,
+                                                     description: props.task.description});
 
     return (
         <div className="task-details">
@@ -34,6 +36,15 @@ export default function TaskDetails(props: TaskDetailsProps): ReactElement {
             <div className="task-horizontal-group">
                 <div>Progress:</div>
                 <TaskProgress task={props.task} enabled_progresses={props.enabled_progresses} />
+            </div>
+            <div className="task-vertical-group">
+                <div>Description:</div>
+                <textarea rows={3}
+                          cols={100}
+                          className="task-description-input"
+                          value={state.description}
+                          onChange={(e) => setState({...state, description: e.target.value})}>
+                </textarea>
             </div>
             <div className="task-vertical-group">
                 <TaskDeadline deadline={state.deadline} handleChange={(e) => setState({...state, deadline: e.deadline})} />
