@@ -1,8 +1,9 @@
 import { ReactElement, useState } from "react";
 import { Progress, Task } from "../task";
+import { MaybeDate } from "../maybedate";
 import TaskProgress from "./task_progress";
 import TaskDeadline from "./task_deadline";
-import { MaybeDate } from "../maybedate";
+import TaskEffectiveDeadline from "./task_effective_deadline";
 
 
 interface TaskDetailsProps {
@@ -30,7 +31,10 @@ export default function TaskDetails(props: TaskDetailsProps): ReactElement {
                 <div>Progress:</div>
                 <TaskProgress task={props.task} enabled_progresses={props.enabled_progresses} />
             </div>
-            <TaskDeadline deadline={state.deadline} handleChange={(e) => setState({...state, deadline: e.deadline})} />
+            <div className="task-vertical-group">
+                <TaskDeadline deadline={state.deadline} handleChange={(e) => setState({...state, deadline: e.deadline})} />
+                <TaskEffectiveDeadline task={props.task} />
+            </div>
         </div>
     );
 }
