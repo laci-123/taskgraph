@@ -20,7 +20,7 @@ interface EditorState {
     description: string;
 }
 
-export default function TaskDetails(props: TaskDetailsProps): ReactElement {
+export default function TaskDetailsInternal(props: TaskDetailsProps): ReactElement {
     const [state, setState] = useState<EditorState>({name: props.task.name,
                                                      deadline: props.task.deadline,
                                                      priority: props.task.priority,
