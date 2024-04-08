@@ -6,6 +6,7 @@ import TaskDeadline from "./task_deadline";
 import TaskEffectiveDeadline from "./task_effective_deadline";
 import TaskPriority from "./task_priority";
 import DependencyList from "./dependency_list";
+import UserList from "./user_list";
 
 
 interface TaskDetailsProps {
@@ -53,6 +54,7 @@ export default function TaskDetailsInternal(props: TaskDetailsProps): ReactEleme
             </div>
             <TaskPriority priority={state.priority} handleChange={(priority) => setState({...state, priority: priority})} />
             <DependencyList task={props.task} />
+            <UserList task={props.task} />
         </div>
     );
 }
