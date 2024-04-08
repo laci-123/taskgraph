@@ -1,8 +1,7 @@
 import { ReactElement } from "react";
-import TopControlsButton from "./topcontrols_button";
 import FloatingButton from "./floating_button";
 import TaskDetails from "./task_details";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { TaskGraph } from "../taskgraph";
 import { Task } from "../task";
 
@@ -29,10 +28,12 @@ export default function TaskPage(props: TaskPageProps): ReactElement {
 }
 
 function TaskPageInternal(props: TaskPageInternalProps): ReactElement {
+    const navigate = useNavigate();
+    
     return (
         <>
             <div className="top-controls">
-                <TopControlsButton text="￩"/>
+                <button className="top-controls-button" onClick={() => navigate(-1)}>￩</button>
             </div>
             <div className="content">
                 <TaskDetails task={props.task} enabled_progresses={["todo", "doing", "done", "failed"]}/>

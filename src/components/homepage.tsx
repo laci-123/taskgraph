@@ -3,7 +3,6 @@ import { Task } from "../task";
 import { TaskGraph } from "../taskgraph";
 import FloatingButton from "./floating_button";
 import MainSelector, { MainSelectorOptionKeys } from "./main_selector";
-import TopControlsButton from "./topcontrols_button";
 import TaskList from "./tasklist";
 
 
@@ -31,7 +30,7 @@ export default function HomePage(props: HomePageProps): ReactElement {
         <>
             <div className="top-controls">
                 <MainSelector selected={props.which_task_list} handleChange={props.handleChange} />
-                <TopControlsButton text="⚙"/>
+                <button className="top-controls-button">⚙</button>
             </div>
             <div className="content">
                 <TaskList tasks={task_list(props.tg, props.which_task_list)} />
