@@ -132,6 +132,11 @@ body {
     gap: 2vh;
 }
 
+.task-link {
+    text-decoration: none;
+    color: inherit;
+}
+
 .task-name-input {
     font-size: 200%;
     font-weight: bold;

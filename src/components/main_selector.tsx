@@ -1,8 +1,12 @@
 import { ReactElement } from "react";
-import { Progress, progress_type_values } from "../task";
+import { Progress, isProgress, progress_type_values } from "../task";
 
 
 export type MainSelectorOptionKeys = Progress | "agenda" | "all";
+
+export function isMainSelectorOptionKey(x: any): x is MainSelectorOptionKeys {
+    return isProgress(x) || x === "agenda" || x === "all";
+}
 
 interface MainSelectorProps {
     selected: MainSelectorOptionKeys;
