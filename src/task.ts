@@ -34,6 +34,30 @@ export class Task {
         public depends_on: Task[] = [],
         public needed_by: Task[] = [])
     {}
+
+    public to_raw_task(): RawTask {
+        const rt = {id: this.id, name: this.name} as RawTask;
+        if(this.description !== "") {
+            rt.description = this.description;
+        }
+        if(this.priority !== 0) {
+            rt.priority = this.priority;
+        }
+        if(this.deadline !== "never") {
+            rt.deadline = this.deadline;
+        }
+        if(this.birthline !== "never") {
+            rt.birthline = this.birthline;
+        }
+        if(this.progress !== "todo") {
+            rt.progress = this.progress;
+        }
+        if(this.depends_on.length > 0) {
+            rt.dependencies = this.depends_on.map((t) => t.id);
+        }
+
+        return rt;
+    }
 }
 
 function compare_tasks_regardless_of_deadline(a: Task, b: Task): number {

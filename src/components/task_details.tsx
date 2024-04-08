@@ -1,6 +1,5 @@
-import { ReactElement, useState } from "react";
-import { Progress, Task } from "../task";
-import { MaybeDate } from "../maybedate";
+import { ReactElement } from "react";
+import { Progress, RawTask, Task } from "../task";
 import TaskProgress from "./task_progress";
 import TaskDeadline from "./task_deadline";
 import TaskEffectiveDeadline from "./task_effective_deadline";
@@ -12,28 +11,18 @@ import UserList from "./user_list";
 interface TaskDetailsProps {
     task: Task;
     enabled_progresses: Progress[];
+    editor_state: RawTask;
+    handleChange: (rt: RawTask) => void;
 }
 
-interface EditorState {
-    name: string;
-    deadline: MaybeDate;
-    priority: number;
-    description: string;
-}
-
-export default function TaskDetailsInternal(props: TaskDetailsProps): ReactElement {
-    const [state, setState] = useState<EditorState>({name: props.task.name,
-                                                     deadline: props.task.deadline,
-                                                     priority: props.task.priority,
-                                                     description: props.task.description});
-
+export default function TaskDetails(props: TaskDetailsProps): ReactElement {
     return (
         <div className="task-details">
             <input type="text"
                    placeholder="Do something..."
                    className="task-name-input"
-                   value={state.name}
-                   onChange={(e) => setState({...state, name: e.target.value})}>
+                   value={props.editor_state.name}
+                   onChange={(e) => props.handleChange({...props.editor_state, name: e.target.value})}>
             </input>
             <div className="task-horizontal-group">
                 <div>Progress:</div>
@@ -44,15 +33,17 @@ export default function TaskDetailsInternal(props: TaskDetailsProps): ReactEleme
                 <textarea rows={3}
                           cols={100}
                           className="task-description-input"
-                          value={state.description}
-                          onChange={(e) => setState({...state, description: e.target.value})}>
+                          value={props.editor_state.description}
+                          onChange={(e) => props.handleChange({...props.editor_state, description: e.target.value})}>
                 </textarea>
             </div>
             <div className="task-vertical-group">
-                <TaskDeadline deadline={state.deadline} handleChange={(e) => setState({...state, deadline: e.deadline})} />
+                <TaskDeadline deadline={props.editor_state.deadline || "never"}
+                              handleChange={(e) => props.handleChange({...props.editor_state, deadline: e.deadline})} />
                 <TaskEffectiveDeadline task={props.task} />
             </div>
-            <TaskPriority priority={state.priority} handleChange={(priority) => setState({...state, priority: priority})} />
+            <TaskPriority priority={props.editor_state.priority || 0}
+                          handleChange={(priority) => props.handleChange({...props.editor_state, priority: priority})} />
             <DependencyList task={props.task} />
             <UserList task={props.task} />
         </div>
