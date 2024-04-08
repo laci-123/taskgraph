@@ -34,6 +34,7 @@ function TaskPageInternal(props: TaskPageInternalProps): ReactElement {
         <>
             <div className="top-controls">
                 <button className="top-controls-button" onClick={() => navigate(-1)}>￩</button>
+                <button className="top-controls-button" onClick={() => navigate("/")}>⌂</button>
             </div>
             <div className="content">
                 <TaskDetails task={props.task} enabled_progresses={["todo", "doing", "done", "failed"]}/>
