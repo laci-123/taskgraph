@@ -5,6 +5,7 @@ import TaskProgress from "./task_progress";
 import TaskDeadline from "./task_deadline";
 import TaskEffectiveDeadline from "./task_effective_deadline";
 import TaskPriority from "./task_priority";
+import DependencyList from "./dependency_list";
 
 
 interface TaskDetailsProps {
@@ -51,6 +52,7 @@ export default function TaskDetails(props: TaskDetailsProps): ReactElement {
                 <TaskEffectiveDeadline task={props.task} />
             </div>
             <TaskPriority priority={state.priority} handleChange={(priority) => setState({...state, priority: priority})} />
+            <DependencyList task={props.task} />
         </div>
     );
 }
