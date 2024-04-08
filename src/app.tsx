@@ -1,4 +1,4 @@
-import {BrowserRouter, Route, Routes} from "react-router-dom";
+import {HashRouter, Route, Routes} from "react-router-dom";
 import HomePage from "./components/homepage";
 import { ReactElement, useState } from "react";
 import { TaskGraph } from "./taskgraph";
@@ -26,7 +26,7 @@ export default function App(): ReactElement {
                                handleChange={(e) => setState({...state, which_task_list: e})} />;
 
     return (
-        <BrowserRouter>
+        <HashRouter>
             <Routes>
                 <Route path="/"/>
                 <Route path="/index.html" element={homepage} />
@@ -34,6 +34,6 @@ export default function App(): ReactElement {
                 <Route path="/task/:task_id" element={<TaskPage tg={tg} />} />
                 <Route path="*" element={homepage} />
             </Routes>
-        </BrowserRouter>
+        </HashRouter>
     );
 }

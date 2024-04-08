@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 import TopControlsButton from "./topcontrols_button";
 import FloatingButton from "./floating_button";
 import TaskDetails from "./task_details";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { TaskGraph } from "../taskgraph";
 
 
@@ -12,7 +12,11 @@ interface TaskPageProps {
 
 export default function TaskPage(props: TaskPageProps): ReactElement {
     const { task_id } = useParams();
-    const task = props.tg.get_task_by_id(parseFloat(task_id ?? "NaN"))!;
+    const task = props.tg.get_task_by_id(parseFloat(task_id ?? "NaN"));
+
+    if(!task) {
+        return <Navigate to="/" />;
+    }
     
     return (
         <>
