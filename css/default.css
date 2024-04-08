@@ -177,6 +177,8 @@ body {
 .task-add-dependency {
     align-self: start;
     padding: 0.5em;
+    border: 1px solid black;
+    padding: 0.5vh;
 }
 
 .task-progress-input-disabled {

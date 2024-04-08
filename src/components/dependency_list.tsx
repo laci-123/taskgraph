@@ -23,7 +23,7 @@ export default function DependencyList(props: DependencyListProps): ReactElement
                                                      </li>)
                 }
             </ul>
-            <button className="task-add-dependency">Add</button>
+            <Link className="task-add-dependency" to="/selector">Add</Link>
         </div>
     );
 }

@@ -8,11 +8,13 @@ import { RawTask, Task } from "../task";
 
 interface TaskPageProps {
     tg: TaskGraph;
+    selected_task: number | null;
     handleSave: (rt: RawTask) => void;
 }
 
 interface TaskPageInternalProps {
     task: Task;
+    selected_task: number | null;
     handleSave: (rt: RawTask) => void;
 }
 
@@ -22,7 +24,7 @@ export default function TaskPage(props: TaskPageProps): ReactElement {
     const task = props.tg.get_task_by_id(id);
 
     if(task) {
-        return <TaskPageInternal task={task} handleSave={props.handleSave} key={id} />;
+        return <TaskPageInternal task={task} selected_task={props.selected_task} handleSave={props.handleSave} key={id} />;
     }
     else {
         return <Navigate to="/" />;
@@ -31,7 +33,12 @@ export default function TaskPage(props: TaskPageProps): ReactElement {
 
 function TaskPageInternal(props: TaskPageInternalProps): ReactElement {
     const navigate = useNavigate();
-    const [editorState, setEditorState] = useState<RawTask>(props.task.to_raw_task());
+    const rt = props.task.to_raw_task();
+    if(props.selected_task) {
+        rt.dependencies = rt.dependencies || [];
+        rt.dependencies.push(props.selected_task);
+    }
+    const [editorState, setEditorState] = useState<RawTask>(rt);
     
     return (
         <>

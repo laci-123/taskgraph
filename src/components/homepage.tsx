@@ -33,7 +33,7 @@ export default function HomePage(props: HomePageProps): ReactElement {
                 <button className="top-controls-button">⚙</button>
             </div>
             <div className="content">
-                <TaskList tasks={task_list(props.tg, props.which_task_list)} />
+                <TaskList tasks={task_list(props.tg, props.which_task_list)} handleClick={null} />
             </div>
             <div className="bottom-controls">
                 <FloatingButton role="add-task" onClick={() => {}} />
