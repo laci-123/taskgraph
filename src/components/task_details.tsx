@@ -13,7 +13,6 @@ interface TaskDetailsProps {
     enabled_progresses: Progress[];
     editor_state: RawTask;
     handleChange: (rt: RawTask) => void;
-    handleSave: () => void;
 }
 
 export default function TaskDetails(props: TaskDetailsProps): ReactElement {    
@@ -27,7 +26,9 @@ export default function TaskDetails(props: TaskDetailsProps): ReactElement {
             </input>
             <div className="task-horizontal-group">
                 <div>Progress:</div>
-                <TaskProgress task={props.task} enabled_progresses={props.enabled_progresses} />
+                <TaskProgress progress={props.editor_state.progress ?? "todo"}
+                              enabled_progresses={props.enabled_progresses}
+                              handleChange={(p) => props.handleChange({...props.editor_state, progress: p})} />
             </div>
             <div className="task-vertical-group">
                 <div>Description:</div>
@@ -52,8 +53,7 @@ export default function TaskDetails(props: TaskDetailsProps): ReactElement {
                                                                else {
                                                                    props.handleChange({...props.editor_state, dependencies: ids});
                                                                }
-                                                               props.handleSave();}
-                                                           } />
+                                                            }} />
             <UserList task={props.task} />
         </div>
     );
