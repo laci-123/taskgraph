@@ -13,6 +13,7 @@ interface TaskDetailsProps {
     enabled_progresses: Progress[];
     editor_state: RawTask;
     handleChange: (rt: RawTask) => void;
+    handleSave: () => void;
 }
 
 export default function TaskDetails(props: TaskDetailsProps): ReactElement {    
@@ -44,7 +45,15 @@ export default function TaskDetails(props: TaskDetailsProps): ReactElement {
             </div>
             <TaskPriority priority={props.editor_state.priority || 0}
                           handleChange={(priority) => props.handleChange({...props.editor_state, priority: priority})} />
-            <DependencyList task={props.task} handleChange={(ids) => props.handleChange({...props.editor_state, dependencies: ids})} />
+            <DependencyList task={props.task} handleChange={(ids) => {
+                                                               if(ids.length === 0) {
+                                                                   props.handleChange({...props.editor_state, dependencies: ids, progress: "todo"});
+                                                               }
+                                                               else {
+                                                                   props.handleChange({...props.editor_state, dependencies: ids});
+                                                               }
+                                                               props.handleSave();}
+                                                           } />
             <UserList task={props.task} />
         </div>
     );

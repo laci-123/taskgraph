@@ -52,6 +52,10 @@ function TaskPageInternal(props: TaskPageInternalProps): ReactElement {
         };
     }, []);
 
+    useEffect(() => {
+        props.handleSave(editorState.rt);
+    }, [editorState.rt.dependencies]);
+
     return (
         <>
             <div className="top-controls">
@@ -62,7 +66,8 @@ function TaskPageInternal(props: TaskPageInternalProps): ReactElement {
             <TaskDetails task={props.task}
                          enabled_progresses={["todo", "doing", "done", "failed"]}
                          editor_state={editorState.rt}
-                         handleChange={(rt) => {setEditorState({...editorState, rt: rt}); props.handleSave(rt);}} />
+                         handleChange={(rt) => setEditorState({...editorState, rt: rt})}
+                         handleSave={() => {}} />
             </div>
         </>
     );
