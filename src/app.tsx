@@ -43,7 +43,8 @@ export default function App(): ReactElement {
                                handleChange={(e) => setState({...state, which_task_list: e})} />;
     const taskpage = <TaskPage tg={state.tg}
                                handleSave={(rt) => setState(update_appstate(state.raw_tasks, state.which_task_list, rt))} />;
-    const selectorpage = <SelectorPage tg={state.tg} handleSave={(rt) => setState(update_appstate(state.raw_tasks, state.which_task_list, rt))} />;
+    const selectorpage = <SelectorPage tg={state.tg}
+                                       handleSave={(rt) => setState(update_appstate(state.raw_tasks, state.which_task_list, rt))} />;
 
     return (
         <HashRouter>

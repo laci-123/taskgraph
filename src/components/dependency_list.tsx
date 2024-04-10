@@ -5,9 +5,12 @@ import { Link } from "react-router-dom";
 
 interface DependencyListProps {
     task: Task;
+    handleChange: (ids: number[]) => void;
 }
 
 export default function DependencyList(props: DependencyListProps): ReactElement {
+    const dep_ids = props.task.depends_on.map((t) => t.id);
+    
     return (
         <div className="task-vertical-group">
             <div>Dependes on:</div>
@@ -19,7 +22,10 @@ export default function DependencyList(props: DependencyListProps): ReactElement
                                                                  {t.name}
                                                              </div>
                                                          </Link>
-                                                         <button className="remove-dependency">x</button>
+                                                         <button className="remove-dependency"
+                                                                 onClick={(_) => props.handleChange(dep_ids.filter((id) => id !== t.id))}>
+                                                             x
+                                                         </button>
                                                      </li>)
                 }
             </ul>
