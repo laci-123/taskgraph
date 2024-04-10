@@ -5,6 +5,7 @@ import { Progress } from "../task";
 interface TaskProgressProps {
     progress: Progress;
     enabled_progresses: Progress[];
+    is_failed_disabled: boolean;
     handleChange: (p: Progress) => void;
 }
 
@@ -12,7 +13,7 @@ export default function TaskProgress(props: TaskProgressProps): ReactElement {
     if(props.progress === "blocked") {
         return <div className="task-progress-input-disabled">BLOCKED</div>;
     }
-    else if(props.progress === "failed") {
+    else if(props.progress === "failed" && props.is_failed_disabled) {
         return <div className="task-progress-input-disabled">FAILED</div>;
     }
     else {

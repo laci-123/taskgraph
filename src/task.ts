@@ -58,6 +58,16 @@ export class Task {
 
         return rt;
     }
+
+    public has_failed_dependency(): boolean {
+        for(const dep_task of this.depends_on) {
+            if(dep_task.progress === "failed") {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 function compare_tasks_regardless_of_deadline(a: Task, b: Task): number {

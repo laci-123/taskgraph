@@ -28,6 +28,7 @@ export default function TaskDetails(props: TaskDetailsProps): ReactElement {
                 <div>Progress:</div>
                 <TaskProgress progress={props.editor_state.progress ?? "todo"}
                               enabled_progresses={props.enabled_progresses}
+                              is_failed_disabled={props.task.has_failed_dependency()}
                               handleChange={(p) => props.handleChange({...props.editor_state, progress: p})} />
             </div>
             <div className="task-vertical-group">
