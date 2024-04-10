@@ -2,13 +2,9 @@ import { ReactElement } from "react";
 import { MaybeDate } from "../maybedate";
 
 
-interface TaskDeadlineState {
-    deadline: MaybeDate;
-}
-
 interface TaskDeadlineProps {
     deadline: MaybeDate
-    handleChange: (e: TaskDeadlineState) => void;
+    handleChange: (e: MaybeDate) => void;
 }
 
 export default function TaskDeadline(props: TaskDeadlineProps): ReactElement {
@@ -19,7 +15,7 @@ export default function TaskDeadline(props: TaskDeadlineProps): ReactElement {
                     <input name="task-has-deadline"
                            type="checkbox"
                            checked={false}
-                           onChange={(e) => props.handleChange({deadline: e.target.checked ? new Date() : "never"})}>
+                           onChange={(e) => {props.handleChange(e.target.checked ? new Date() : "never");}}>
                     </input>
                     <label htmlFor="task-has-deadline">Deadline</label>
                 </div>
@@ -33,13 +29,13 @@ export default function TaskDeadline(props: TaskDeadlineProps): ReactElement {
                     <input name="task-has-deadline"
                            type="checkbox"
                            checked={true}
-                           onChange={(e) => props.handleChange({deadline: e.target.checked ? new Date() : "never"})}>
+                           onChange={(e) => {props.handleChange(e.target.checked ? new Date() : "never");}}>
                     </input>
                     <label htmlFor="task-has-deadline">Deadline</label>
                 </div>
                 <input type="date"
                        value={props.deadline.toISOString().split("T")[0]}
-                       onChange={(e) => props.handleChange({deadline: e.target.valueAsDate!})}>
+                       onChange={(e) => {props.handleChange(e.target.valueAsDate!);}}>
                 </input>
             </div>
         );

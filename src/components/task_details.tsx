@@ -15,7 +15,7 @@ interface TaskDetailsProps {
     handleChange: (rt: RawTask) => void;
 }
 
-export default function TaskDetails(props: TaskDetailsProps): ReactElement {
+export default function TaskDetails(props: TaskDetailsProps): ReactElement {    
     return (
         <div className="task-details">
             <input type="text"
@@ -39,7 +39,7 @@ export default function TaskDetails(props: TaskDetailsProps): ReactElement {
             </div>
             <div className="task-vertical-group">
                 <TaskDeadline deadline={props.editor_state.deadline || "never"}
-                              handleChange={(e) => props.handleChange({...props.editor_state, deadline: e.deadline})} />
+                              handleChange={(e) => props.handleChange({...props.editor_state, deadline: e})} />
                 <TaskEffectiveDeadline task={props.task} />
             </div>
             <TaskPriority priority={props.editor_state.priority || 0}

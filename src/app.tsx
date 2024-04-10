@@ -21,7 +21,6 @@ interface AppState {
     which_task_list: MainSelectorOptionKeys;
     raw_tasks: Map<number, RawTask>;
     tg: TaskGraph;
-    selected_task: number | null;
 }
 
 function update_appstate(raw_tasks: Map<number, RawTask> | "load-tasks", task_list: MainSelectorOptionKeys, rt?: RawTask): AppState {
@@ -33,8 +32,7 @@ function update_appstate(raw_tasks: Map<number, RawTask> | "load-tasks", task_li
     }
     return {which_task_list: task_list,
             raw_tasks: raw_tasks,
-            tg: new TaskGraph(Array.from(raw_tasks.values())),
-            selected_task: null};
+            tg: new TaskGraph(Array.from(raw_tasks.values()))};
 }
 
 export default function App(): ReactElement {
@@ -44,9 +42,8 @@ export default function App(): ReactElement {
                                which_task_list={state.which_task_list}
                                handleChange={(e) => setState({...state, which_task_list: e})} />;
     const taskpage = <TaskPage tg={state.tg}
-                               selected_task={state.selected_task}
                                handleSave={(rt) => setState(update_appstate(state.raw_tasks, state.which_task_list, rt))} />;
-    const selectorpage = <SelectorPage tg={state.tg} handleSelect={(id) => setState({...state, selected_task: id})} />;
+    const selectorpage = <SelectorPage tg={state.tg} handleSave={(rt) => setState(update_appstate(state.raw_tasks, state.which_task_list, rt))} />;
 
     return (
         <HashRouter>
@@ -55,7 +52,7 @@ export default function App(): ReactElement {
                 <Route path="/index.html" element={homepage} />
                 <Route index element={homepage} />
                 <Route path="/task/:task_id" element={taskpage} />
-                <Route path="/selector" element={selectorpage} />
+                <Route path="/selector/:task_id" element={selectorpage} />
                 <Route path="*" element={homepage} />
             </Routes>
         </HashRouter>
