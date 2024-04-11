@@ -93,7 +93,8 @@ export class TaskGraph {
         // convert raw tasks to tasks, filling in missing values with defaults
         for(const rt of raw_tasks) {
             // effective priority and effective deadline are by default the same as priority and deadline
-            const task = new Task(rt.id, rt.name, rt.description, rt.priority, rt.deadline, rt.priority, rt.deadline, rt.birthline, rt.progress);
+            const task = new Task(rt.id, rt.name, rt.description, rt.priority, rt.deadline, rt.priority, rt.deadline, rt.birthline,
+                                  rt.progress === "blocked" ? "todo" : rt.progress); // a task cannot be blocked on its own, it can only be marked so based on its dependencies
             this.tasks.set(rt.id, task);
             if(!rt.dependencies || rt.dependencies.length === 0) {
                 this.roots.add(task);
