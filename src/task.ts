@@ -20,6 +20,54 @@ export interface RawTask {
     dependencies?: number[],
 }
 
+export function copy_RawTask_without_defaults(rt: RawTask): RawTask {
+    const {id, name, description, priority, deadline, birthline, progress, dependencies} = rt;
+    const new_rt = {id, name} as RawTask;
+    if(description !== "") {
+        new_rt.description = description;
+    }
+    if(priority !== 0) {
+        new_rt.priority = priority;
+    }
+    if(deadline !== "never") {
+        new_rt.deadline = deadline;
+    }
+    if(birthline !== "never") {
+        new_rt.birthline = birthline;
+    }
+    if(progress !== "blocked" && progress !== "todo") {
+        new_rt.progress = progress;
+    }
+    if(dependencies && dependencies.length > 0) {
+        new_rt.dependencies = dependencies;
+    }
+
+    return new_rt;
+}
+
+export function isRawTask(x: any): x is RawTask {
+    return "id"   in x && typeof(x.id)   === "number" &&
+           "name" in x && typeof(x.name) === "string";
+}
+
+export function asRawTask(x: any): RawTask {
+    if(isRawTask(x)) {
+        return x;
+    }
+    else {
+        throw new Error(`cannot convert '${x}' to RawTask`);
+    }
+}
+
+export function asRawTaskArray(xs: any): RawTask[] {
+    if(Array.isArray(xs)) {
+        return xs.map((x) => asRawTask(x));
+    }
+    else {
+        throw new Error(`cannot convert '${xs}' to RawTask`);
+    }
+}
+
 export class Task {
     constructor(
         public id: number,

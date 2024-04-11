@@ -398,3 +398,34 @@ test("smallest available id", () => {
     const tg4 = new TaskGraph([{id: 0, name: "a"}, {id: 1, name: "b"}, {id: 2, name: "c"}, {id: 4, name: "e"}]);
     expect(tg4.smallest_available_id).toEqual(3);
 });
+
+test("create TaskGraph from JSON", () => {
+    const json0 = '[]';
+    expect(TaskGraph.from_json(json0).all_tasks.length).toEqual(0);
+
+    const json1 = '[{"id": 0, "name": "abc"}, {"id": 1, "name": "def ghi", "progress": 10}]';
+    expect(TaskGraph.from_json(json1).all_tasks.length).toEqual(2);
+
+    const json2 = '[{"id": 0, "name": "abc"}, {"id": 0, "name": "def ghi"}]';
+    expect(TaskGraph.from_json(json2).all_tasks.length).toEqual(1);
+
+    const json3 = '[{"id": 0, "name": ]';
+    expect(() => TaskGraph.from_json(json3)).toThrow("cannot create TaskGraph from JSON");
+
+    const json4 = '[{"progress": 4}, {"id": 1, "name": "def ghi", "progress": 10}]';
+    expect(() => TaskGraph.from_json(json4)).toThrow("cannot create TaskGraph from JSON");
+
+    const json5 = '{"id": 1, "name": "def ghi", "progress": 10}';
+    expect(() => TaskGraph.from_json(json5)).toThrow("cannot create TaskGraph from JSON");
+});
+
+test("convert TaskGraph to JSON", () => {
+    const tg0 = new TaskGraph([]);
+    expect(tg0.to_json()).toEqual("[]");
+
+    const tg1 = new TaskGraph([{id: 0, name: "abc"}]);
+    expect(tg1.to_json()).toEqual('[{"id":0,"name":"abc"}]');
+
+    const tg2 = new TaskGraph([{id: 0, name: "abc", priority: 0, deadline: "never"}, {id: 1, name: "def", dependencies: [0]}]);
+    expect(tg2.to_json()).toEqual('[{"id":0,"name":"abc"},{"id":1,"name":"def","dependencies":[0]}]');
+});

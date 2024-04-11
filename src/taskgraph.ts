@@ -1,5 +1,5 @@
 import {MaybeDate, compare_dates} from "./maybedate";
-import {Task, RawTask, compare_tasks, Progress} from "./task";
+import {Task, RawTask, compare_tasks, Progress, asRawTaskArray, copy_RawTask_without_defaults} from "./task";
 import PriorityQueue from "priority-queue-typescript";
 
 
@@ -69,6 +69,21 @@ export class TaskGraph {
         // No need for checking for circles: it has already been checked in the constructor.
 
         return L;
+    }
+
+    static from_json(json: string): TaskGraph {
+        try {
+            const raw_tasks = asRawTaskArray(JSON.parse(json));
+            return new TaskGraph(raw_tasks);
+        }
+        catch(e) {
+            throw new Error(`cannot create TaskGraph from JSON: ${e}`);
+        }
+    }
+
+    public to_json(): string {
+        const raw_tasks = this.all_tasks.map((t) => copy_RawTask_without_defaults(t.to_raw_task()));
+        return JSON.stringify(raw_tasks);
     }
 
     constructor(raw_tasks: RawTask[]) {
