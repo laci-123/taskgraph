@@ -45,13 +45,14 @@ export function copy_RawTask_without_defaults(rt: RawTask): RawTask {
     return new_rt;
 }
 
-export function isRawTask(x: any): x is RawTask {
-    return "id"   in x && typeof(x.id)   === "number" &&
-           "name" in x && typeof(x.name) === "string";
-}
-
 export function asRawTask(x: any): RawTask {
-    if(isRawTask(x)) {
+    if("id" in x && typeof(x.id) === "number" && "name" in x && typeof(x.name) == "string") {
+        if("deadline" in x && typeof(x.deadline) === "string") {
+            x.deadline = new Date(x.deadline);
+        }
+        if("birthline" in x && typeof(x.birthline) === "string") {
+            x.birthline = new Date(x.birthline);
+        }
         return x;
     }
     else {

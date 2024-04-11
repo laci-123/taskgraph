@@ -1,6 +1,6 @@
 import {HashRouter, Route, Routes} from "react-router-dom";
 import HomePage from "./components/homepage";
-import { ReactElement, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { RawTask } from "./task";
 import { TaskGraph } from "./taskgraph";
 import TaskPage from "./components/taskpage";
@@ -8,15 +8,6 @@ import { MainSelectorOptionKeys } from "./components/main_selector";
 import SelectorPage from "./components/selectorpage";
 import ErrorPage from "./components/errorpage";
 
-
-// This is going to be loaded from local storage.
-const raw_tasks_c = [{id: 0, name: "cook lunch",                                                       deadline: new Date("2024-04-13"), priority: 5,  dependencies: [1, 4]},
-                     {id: 1, name: "buy some food",                                                    deadline: new Date("2024-04-15"), priority: 0,  dependencies: [3]},
-                     {id: 2, name: "walk the dog",                                                     deadline: new Date("2024-04-04"), priority: 10, dependencies: []},
-                     {id: 3, name: "go to the store",                                                  deadline: "never",                priority: 0,  dependencies: [5]},
-                     {id: 4, name: "learn how to cook [The quick brown fox jumps over the lazy dog.]", deadline: "never",                priority: 0,  dependencies: []},
-                     {id: 5, name: "fix the car",                                                      deadline: "never",                priority: -1, dependencies: [], progress: "doing"},
-                     {id: 6, name: "return library books",                                             deadline: new Date("2023-04-1"),  priority: 0,  dependencies: [5]}];
 
 interface AppState {
     which_task_list: MainSelectorOptionKeys;
@@ -27,10 +18,11 @@ interface AppState {
 
 function init_appstate(): AppState {
     try {
-        const tg = new TaskGraph(raw_tasks_c as RawTask[]);
+        const json = localStorage.getItem("tasks") ?? "[]";
+        const tg = TaskGraph.from_json(json);
         return {
             which_task_list: "agenda",
-            raw_tasks: raw_tasks_c as RawTask[],
+            raw_tasks: tg.all_tasks.map((t) => t.to_raw_task()),
             tg: tg,
             error: null
         };
@@ -39,7 +31,7 @@ function init_appstate(): AppState {
         if(e instanceof Error) {
             return {
                 which_task_list: "agenda",
-                raw_tasks: raw_tasks_c as RawTask[],
+                raw_tasks: [],
                 tg: new TaskGraph([]),
                 error: e
             };
@@ -94,6 +86,10 @@ function update_appstate(app_state: AppState, rt: RawTask, remove?: "remove"): A
 
 export default function App(): ReactElement {
     const [state, setState] = useState<AppState>(init_appstate());
+
+    useEffect(() => {
+        localStorage.setItem("tasks", state.tg.to_json());
+    }, [state.tg]);
 
     const homepage = <HomePage tg={state.tg}
                                which_task_list={state.which_task_list}
