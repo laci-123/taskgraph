@@ -113,6 +113,13 @@ export class TaskGraph {
         this.roots.forEach((root) => {
             propagate(root, colors);
         });
+
+        // there is a non-black task after dfs --> it is unreachable from all roots --> it is part of a dependency-circle
+        for(const c of colors.values()) {
+            if(c !== "black") {
+                throw new Error("Circular dependencies");
+            }
+        }
     }
 }
 

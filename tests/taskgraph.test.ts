@@ -260,10 +260,24 @@ test("trivial circular dependency is detected", () => {
     expect(() => new TaskGraph([{id: 0, name: "think of something clever", dependencies: [0]}])).toThrow("Circular dependencies");
 });
 
-test("non-trivial circular dependency is dtected", () => {
+test("non-trivial circular dependency is detected", () => {
     expect(() => new TaskGraph([{id: 0, name: "go shopping", dependencies: [1]}, 
                                 {id: 1, name: "fix car",     dependencies: [2]},
                                 {id: 2, name: "buy tools",   dependencies: [0]}]))
+        .toThrow("Circular dependencies");
+});
+
+test("trivial circular dependency is detected whith tasks not part of the circle", () => {
+    expect(() => new TaskGraph([{id: 0, name: "go shopping", dependencies: [0]}, 
+                                {id: 1, name: "walk the dog"}]))
+        .toThrow("Circular dependencies");
+});
+
+test("non-trivial circular dependency is detected whith tasks not part of the circle", () => {
+    expect(() => new TaskGraph([{id: 0, name: "go shopping", dependencies: [1]}, 
+                                {id: 1, name: "fix car",     dependencies: [2]},
+                                {id: 2, name: "buy tools",   dependencies: [0]},
+                                {id: 3, name: "walk the dog"}]))
         .toThrow("Circular dependencies");
 });
 
