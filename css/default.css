@@ -41,6 +41,12 @@ body {
     border: none;
 }
 
+.top-controls-text {
+    color: white;
+    font-size: 3vh;
+    font-family: sans-serif;
+}
+
 .bottom-controls {
     bottom: 0;
     right: 0;

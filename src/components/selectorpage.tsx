@@ -19,7 +19,7 @@ export default function SelectorPage(props: SelectorPageProps): ReactElement {
     }
 
     function handleClick(task: Task, dep_id: number) {
-        const dep_task = props.tg.get_task_by_id(dep_id)!; // we assume TaskList only list valid IDs
+        const dep_task = props.tg.get_task_by_id(dep_id)!; // we assume TaskList only lists valid IDs
         const rt = task.to_raw_task(); 
         if(rt.dependencies) {
             rt.dependencies.push(dep_task.id);
@@ -34,7 +34,8 @@ export default function SelectorPage(props: SelectorPageProps): ReactElement {
     return (
         <>
             <div className="top-controls">
-                <button className="top-controls-button">SELECT A TASK</button>
+                <button className="top-controls-button" onClick={() => navigate(-1)}>￩</button>
+                <div className="top-controls-text">SELECT A TASK</div>
             </div>
             <div className="content">
                 <TaskList tasks={props.tg.all_tasks} handleClick={(id) => handleClick(task, id)} />
