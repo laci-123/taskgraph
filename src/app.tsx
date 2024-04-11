@@ -52,13 +52,18 @@ function init_appstate(): AppState {
 
 function update_appstate(app_state: AppState, rt: RawTask): AppState {
     const raw_tasks = [];
+    let pushed = false;
     for(const art of app_state.raw_tasks) {
         if(art.id === rt.id) {
             raw_tasks.push(rt);
+            pushed = true;
         }
         else {
             raw_tasks.push(art);
         }
+    }
+    if(!pushed) {
+        raw_tasks.push(rt);
     }
 
     try {
@@ -103,7 +108,7 @@ export default function App(): ReactElement {
                     <Route path="/"/>
                     <Route path="/index.html" element={homepage} />
                     <Route index element={homepage} />
-                    <Route path="/task/:task_id" element={taskpage} />
+                    <Route path="/task/:task_param" element={taskpage} />
                     <Route path="/selector/:task_id" element={selectorpage} />
                     <Route path="*" element={homepage} />
                 </Route>

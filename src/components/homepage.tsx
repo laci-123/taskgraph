@@ -1,9 +1,9 @@
-import { ReactElement, useState } from "react";
+import { ReactElement } from "react";
 import { Task } from "../task";
 import { TaskGraph } from "../taskgraph";
-import FloatingButton from "./floating_button";
 import MainSelector, { MainSelectorOptionKeys } from "./main_selector";
 import TaskList from "./tasklist";
+import { useNavigate } from "react-router-dom";
 
 
 function task_list(tg: TaskGraph, k: MainSelectorOptionKeys): Task[] {
@@ -26,6 +26,8 @@ interface HomePageProps {
 }
 
 export default function HomePage(props: HomePageProps): ReactElement {
+    const navigate = useNavigate();
+    
     return (
         <>
             <div className="top-controls">
@@ -36,7 +38,7 @@ export default function HomePage(props: HomePageProps): ReactElement {
                 <TaskList tasks={task_list(props.tg, props.which_task_list)} handleClick={null} />
             </div>
             <div className="bottom-controls">
-                <FloatingButton role="add-task" onClick={() => {}} />
+                <button className="floating-button circular" onClick={() => navigate(`/task/${props.tg.smallest_available_id}`)}>+</button>
             </div>
         </>
     );

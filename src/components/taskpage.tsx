@@ -1,6 +1,6 @@
 import { ReactElement, useState, useEffect, useRef } from "react";
 import TaskDetails from "./task_details";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { TaskGraph } from "../taskgraph";
 import { RawTask, Task } from "../task";
 
@@ -20,16 +20,11 @@ interface EditorState {
 }
 
 export default function TaskPage(props: TaskPageProps): ReactElement {
-    const { task_id } = useParams();
-    const id = parseFloat(task_id ?? "NaN");
-    const task = props.tg.get_task_by_id(id);
+    const { task_param } = useParams();
+    const task_id = parseFloat(task_param ?? "NaN");
+    const task = props.tg.get_task_by_id(task_id) ?? new Task(task_id, "");
 
-    if(task) {
-        return <TaskPageInternal task={task} handleSave={props.handleSave} key={id} />;
-    }
-    else {
-        return <Navigate to="/" />;
-    }
+    return <TaskPageInternal task={task} handleSave={props.handleSave} key={task.id} />;
 }
 
 function TaskPageInternal(props: TaskPageInternalProps): ReactElement {
@@ -43,6 +38,7 @@ function TaskPageInternal(props: TaskPageInternalProps): ReactElement {
         props.handleSave(editorStateRef.current!.rt);
     }
     useEffect(() => {
+        console.log("useEffect setting up event handlers");
         window.onbeforeunload = () => before_leaving_page();
         window.addEventListener("beforeunload", (_) => before_leaving_page());
 
@@ -53,6 +49,7 @@ function TaskPageInternal(props: TaskPageInternalProps): ReactElement {
     }, []);
 
     useEffect(() => {
+        console.log("useEffect for dependencies: ", editorState.rt.dependencies);
         props.handleSave(editorState.rt);
     }, [editorState.rt.dependencies]);
 
