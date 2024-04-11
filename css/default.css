@@ -85,6 +85,12 @@ body {
     font-size: 2vh;
 }
 
+.taskpage {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
 .task-list {
     overflow-y: scroll;
     max-height: 100%;
@@ -216,4 +222,5 @@ body {
     border: 1px solid black;
     padding: 1vh;
     margin: 2vh;
+    align-self: end;
 }

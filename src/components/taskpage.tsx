@@ -59,18 +59,24 @@ function TaskPageInternal(props: TaskPageInternalProps): ReactElement {
                 <button className="top-controls-button" onClick={() => navigate(-1)}>￩</button>
                 <button className="top-controls-button" onClick={() => navigate("/")}>⌂</button>
             </div>
-            <div className="content">
+            <div className="content taskpage">
                 <TaskDetails task={props.task}
                              enabled_progresses={["todo", "doing", "done", "failed"]}
                              editor_state={editorState.rt}
                              handleChange={(rt) => setEditorState({...editorState, rt: rt})} />
-                <button className="remove-task-button"
-                        onClick={() => {
-                            setEditorState({...editorState, remove: true});
-                            navigate(-1);
-                        }}>
-                    Delete this task
-                </button>
+                {
+                    props.task.needed_by.length === 0
+                    ?
+                        <button className="remove-task-button"
+                                onClick={() => {
+                                    setEditorState({...editorState, remove: true});
+                                    navigate(-1);
+                                }}>
+                            Delete this task
+                        </button>
+                    :
+                        <></>
+                }
             </div>
         </>
     );
