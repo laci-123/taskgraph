@@ -51,7 +51,7 @@ function TaskPageInternal(props: TaskPageInternalProps): ReactElement {
 
     useEffect(() => {
         props.handleSave(editorState.rt);
-    }, [editorState.rt.dependencies]);
+    }, [editorState.rt.dependencies, editorState.rt.progress]);
 
     return (
         <>
