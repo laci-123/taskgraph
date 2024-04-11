@@ -209,3 +209,11 @@ body {
 .task-description-input {
     width: 100%;
 }
+
+.remove-task-button {
+    color: red;
+    background-color: white;
+    border: 1px solid black;
+    padding: 1vh;
+    margin: 2vh;
+}

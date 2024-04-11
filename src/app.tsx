@@ -50,19 +50,21 @@ function init_appstate(): AppState {
     }
 }
 
-function update_appstate(app_state: AppState, rt: RawTask): AppState {
+function update_appstate(app_state: AppState, rt: RawTask, remove?: "remove"): AppState {
     const raw_tasks = [];
-    let pushed = false;
+    let found = false;
     for(const art of app_state.raw_tasks) {
         if(art.id === rt.id) {
-            raw_tasks.push(rt);
-            pushed = true;
+            if(!remove) {
+                raw_tasks.push(rt);
+                found = true;
+            }
         }
         else {
             raw_tasks.push(art);
         }
     }
-    if(!pushed) {
+    if(!found && !remove) {
         raw_tasks.push(rt);
     }
 
@@ -97,7 +99,7 @@ export default function App(): ReactElement {
                                which_task_list={state.which_task_list}
                                handleChange={(e) => setState({...state, which_task_list: e})} />;
     const taskpage = <TaskPage tg={state.tg}
-                               handleSave={(rt) => setState(update_appstate(state, rt))} />;
+                               handleSave={(rt, remove) => setState(update_appstate(state, rt, remove))} />;
     const selectorpage = <SelectorPage tg={state.tg}
                                        handleSave={(rt) => setState(update_appstate(state, rt))} />;
 

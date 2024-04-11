@@ -7,16 +7,17 @@ import { RawTask, Task } from "../task";
 
 interface TaskPageProps {
     tg: TaskGraph;
-    handleSave: (rt: RawTask) => void;
+    handleSave: (rt: RawTask, remove?: "remove") => void;
 }
 
 interface TaskPageInternalProps {
     task: Task;
-    handleSave: (rt: RawTask) => void;
+    handleSave: (rt: RawTask, remove?: "remove") => void;
 }
 
 interface EditorState {
     rt: RawTask;
+    remove: boolean;
 }
 
 export default function TaskPage(props: TaskPageProps): ReactElement {
@@ -30,15 +31,15 @@ export default function TaskPage(props: TaskPageProps): ReactElement {
 function TaskPageInternal(props: TaskPageInternalProps): ReactElement {
     const navigate = useNavigate();
     const rt = props.task.to_raw_task();
-    const [editorState, setEditorState] = useState<EditorState>({rt: rt});
+    const [editorState, setEditorState] = useState<EditorState>({rt: rt, remove: false});
 
     const editorStateRef = useRef<EditorState>();
     editorStateRef.current = editorState;
     function before_leaving_page() {
-        props.handleSave(editorStateRef.current!.rt);
+        const esrc = editorStateRef.current!;
+        props.handleSave(esrc.rt, esrc.remove ? "remove" : undefined);
     }
     useEffect(() => {
-        console.log("useEffect setting up event handlers");
         window.onbeforeunload = () => before_leaving_page();
         window.addEventListener("beforeunload", (_) => before_leaving_page());
 
@@ -49,7 +50,6 @@ function TaskPageInternal(props: TaskPageInternalProps): ReactElement {
     }, []);
 
     useEffect(() => {
-        console.log("useEffect for dependencies: ", editorState.rt.dependencies);
         props.handleSave(editorState.rt);
     }, [editorState.rt.dependencies]);
 
@@ -60,10 +60,17 @@ function TaskPageInternal(props: TaskPageInternalProps): ReactElement {
                 <button className="top-controls-button" onClick={() => navigate("/")}>⌂</button>
             </div>
             <div className="content">
-            <TaskDetails task={props.task}
-                         enabled_progresses={["todo", "doing", "done", "failed"]}
-                         editor_state={editorState.rt}
-                         handleChange={(rt) => setEditorState({...editorState, rt: rt})} />
+                <TaskDetails task={props.task}
+                             enabled_progresses={["todo", "doing", "done", "failed"]}
+                             editor_state={editorState.rt}
+                             handleChange={(rt) => setEditorState({...editorState, rt: rt})} />
+                <button className="remove-task-button"
+                        onClick={() => {
+                            setEditorState({...editorState, remove: true});
+                            navigate(-1);
+                        }}>
+                    Delete this task
+                </button>
             </div>
         </>
     );
