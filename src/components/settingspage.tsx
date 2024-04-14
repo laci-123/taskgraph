@@ -1,18 +1,15 @@
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement } from "react";
 import { useNavigate } from "react-router-dom";
 
 
-export default function SettingsPage(): ReactElement {
+interface SettingsPageProps {
+    is_dark: boolean;
+    handleChange: (is_dark: boolean) => void;
+}
+
+
+export default function SettingsPage(props: SettingsPageProps): ReactElement {
     const navigate = useNavigate();
-    const [isDark, setIsDark] = useState(false);
-    useEffect(() => {
-        if(isDark) {
-            document.body.classList.add("dark-mode");
-        }
-        else {
-            document.body.classList.remove("dark-mode");
-        }
-    }, [isDark]);
 
     return (
         <>
@@ -23,8 +20,8 @@ export default function SettingsPage(): ReactElement {
                 <div className="settings">
                     <input name="dadk-mode"
                         type="checkbox"
-                        checked={isDark}
-                        onChange={() => setIsDark(!isDark)}>
+                        checked={props.is_dark}
+                        onChange={() => props.handleChange(!props.is_dark)}>
                     </input>
                     <label htmlFor="dark-mode">Dark mode</label>
                 </div>

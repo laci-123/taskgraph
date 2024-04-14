@@ -13,17 +13,20 @@ import SettingsPage from "./components/settingspage";
 interface AppState {
     which_task_list: MainSelectorOptionKeys;
     raw_tasks: RawTask[];
+    dark_mode: boolean;
     tg: TaskGraph;
     error: Error | null;
 }
 
 function init_appstate(): AppState {
+    const json = localStorage.getItem("tasks") ?? "[]";
+    const dark_mode = localStorage.getItem("dark-mode") === "true";
     try {
-        const json = localStorage.getItem("tasks") ?? "[]";
         const tg = TaskGraph.from_json(json);
         return {
             which_task_list: "agenda",
             raw_tasks: tg.all_tasks.map((t) => t.to_raw_task()),
+            dark_mode: dark_mode,
             tg: tg,
             error: null
         };
@@ -33,6 +36,7 @@ function init_appstate(): AppState {
             return {
                 which_task_list: "agenda",
                 raw_tasks: [],
+                dark_mode: dark_mode,
                 tg: new TaskGraph([]),
                 error: e
             };
@@ -65,6 +69,7 @@ function update_appstate(app_state: AppState, rt: RawTask, remove?: "remove"): A
         const tg = new TaskGraph(raw_tasks);
         return {
             which_task_list: app_state.which_task_list,
+            dark_mode: app_state.dark_mode,
             raw_tasks: raw_tasks,
             tg: tg,
             error: null
@@ -74,6 +79,7 @@ function update_appstate(app_state: AppState, rt: RawTask, remove?: "remove"): A
         if(e instanceof Error) {
             return {
                 which_task_list: app_state.which_task_list,
+                dark_mode: app_state.dark_mode,
                 raw_tasks: app_state.raw_tasks,
                 tg: app_state.tg,
                 error: e,
@@ -91,6 +97,16 @@ export default function App(): ReactElement {
     useEffect(() => {
         localStorage.setItem("tasks", state.tg.to_json());
     }, [state.tg]);
+    useEffect(() => {
+        if(state.dark_mode) {
+            document.body.classList.add("dark-mode");
+            localStorage.setItem("dark-mode", "true");
+        }
+        else {
+            document.body.classList.remove("dark-mode");
+            localStorage.setItem("dark-mode", "false");
+        }
+    }, [state.dark_mode]);
 
     const homepage = <HomePage tg={state.tg}
                                which_task_list={state.which_task_list}
@@ -99,6 +115,7 @@ export default function App(): ReactElement {
                                handleSave={(rt, remove) => setState(update_appstate(state, rt, remove))} />;
     const selectorpage = <SelectorPage tg={state.tg}
                                        handleSave={(rt) => setState(update_appstate(state, rt))} />;
+    const settingspage = <SettingsPage is_dark={state.dark_mode} handleChange={(is_dark) => setState({...state, dark_mode: is_dark})} />;
 
     return (
         <HashRouter>
@@ -109,7 +126,7 @@ export default function App(): ReactElement {
                     <Route index element={homepage} />
                     <Route path="/task/:task_param" element={taskpage} />
                     <Route path="/selector/:task_id" element={selectorpage} />
-                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/settings" element={settingspage} />
                     <Route path="*" element={homepage} />
                 </Route>
             </Routes>
