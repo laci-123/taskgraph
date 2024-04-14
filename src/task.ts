@@ -108,6 +108,16 @@ export class Task {
         return rt;
     }
 
+    public has_unfinished_dependency(): boolean {
+        for(const dep_task of this.depends_on) {
+            if(dep_task.progress === "blocked" || dep_task.progress === "todo" || dep_task.progress === "doing") {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public has_failed_dependency(): boolean {
         for(const dep_task of this.depends_on) {
             if(dep_task.progress === "failed") {

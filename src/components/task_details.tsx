@@ -26,7 +26,7 @@ export default function TaskDetails(props: TaskDetailsProps): ReactElement {
             <div className="task-horizontal-group">
                 <div>Progress:</div>
                 <TaskProgress progress={props.editor_state.progress ?? "todo"}
-                              enabled_progresses={props.task.depends_on.length > 0 ? ["todo", "failed"] : ["todo", "doing", "done", "failed"]}
+                              enabled_progresses={props.task.has_unfinished_dependency() ? ["todo", "failed"] : ["todo", "doing", "done", "failed"]}
                               is_failed_disabled={props.task.has_failed_dependency()}
                               handleChange={(p) => props.handleChange({...props.editor_state, progress: p})} />
             </div>
