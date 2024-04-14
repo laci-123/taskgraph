@@ -21,7 +21,8 @@ module.exports = {
         new CopyPlugin({
             patterns: [
                 "index.html",
-                "css/*"
+                "css/*",
+                "img/*"
             ],
         }),
     ],

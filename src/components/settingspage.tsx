@@ -7,7 +7,6 @@ interface SettingsPageProps {
     handleChange: (is_dark: boolean) => void;
 }
 
-
 export default function SettingsPage(props: SettingsPageProps): ReactElement {
     const navigate = useNavigate();
 
