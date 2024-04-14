@@ -21,8 +21,10 @@ module.exports = {
         new CopyPlugin({
             patterns: [
                 "index.html",
+                "manifest.json",
+                "sw.js",
                 "css/*",
-                "img/*"
+                "img/*.png"
             ],
         }),
     ],
