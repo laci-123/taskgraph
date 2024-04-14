@@ -130,7 +130,7 @@ body {
 
 .task-name {
     font-size: 150%;
-    var(--color-controls-foreground-space: nowrap);
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -163,6 +163,8 @@ body {
 }
 
 .task-name-input {
+    color: var(--color-foreground);
+    background-color: var(--color-background);
     font-size: 200%;
     font-weight: bold;
     max-width: 100%;
@@ -174,17 +176,17 @@ body {
 }
 
 .task-select-box {
-    color: black;
-    background-color: var(--color-controls-foreground);
-    border: 1px solid black;
+    color: var(--color-foreground);
+    background-color: var(--color-background);
+    border: 1px solid var(--color-foreground);
     font-size: 2vh;
     padding: 1vh;
 }
 
 .dependency-list-item {
-    color: black;
-    background-color: var(--color-controls-foreground);
-    border: 1px solid black;
+    color: var(--color-foreground);
+    background-color: var(--color-background);
+    border: 1px solid var(--color-foreground);
     padding: 0.5vh;
     margin-bottom: 1vh;
     box-shadow: 2px 2px gray;
@@ -193,16 +195,18 @@ body {
 
 .remove-dependency {
     color: red;
-    background-color: var(--color-controls-foreground);
+    background-color: var(--color-background);
     border: none;
     font-size: 150%;
     padding: 0;
 }
 
 .task-add-dependency {
+    color: var(--color-foreground);
+    background-color: var(--color-background);
     align-self: start;
     padding: 0.5em;
-    border: 1px solid black;
+    border: 1px solid var(--color-background);
     padding: 0.5vh;
 }
 
@@ -226,12 +230,14 @@ body {
 }
 
 .task-description-input {
+    color: var(--color-foreground);
+    background-color: var(--color-background);
     width: 100%;
 }
 
 .remove-task-button {
     color: red;
-    background-color: var(--color-controls-foreground);
+    background-color: var(--color-controls-background);
     border: 1px solid black;
     padding: 1vh;
     margin: 2vh;
