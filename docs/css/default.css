@@ -1,0 +1,245 @@
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
+body {
+    height: 100dvh;
+    --color-background: white;
+    --color-foreground: black;
+    --color-controls-background: green;
+    --color-controls-foreground: white;
+}
+
+.dark-mode {
+    --color-background: black;
+    --color-foreground: white;
+}
+
+#root > * {
+    position: absolute;
+}
+
+.top-controls {
+    top: 0;
+    height: 10vh;
+    width: 100%;
+    z-index: 2;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--color-controls-background);
+    padding: 2vh;
+}
+
+.main-selector {
+    color: var(--color-controls-foreground);
+    background-color: var(--color-controls-background);
+    border: 1px solid var(--color-controls-foreground);
+    font-size: 2vh;
+    padding: 1vh;
+}
+
+.top-controls-button {
+    color: var(--color-controls-foreground);
+    background-color: var(--color-controls-background);
+    font-size: 5vh;
+    border: none;
+}
+
+.top-controls-text {
+    color: var(--color-controls-foreground);
+    font-size: 3vh;
+    font-family: sans-serif;
+}
+
+.bottom-controls {
+    bottom: 0;
+    right: 0;
+    height: 20vh;
+    z-index: 2;
+    display: inline-flex;
+    flex-direction: row;
+    justify-content: end;
+    align-items: center;
+}
+
+.floating-button {
+    height: 50%;
+    color: var(--color-controls-foreground);
+    background-color: var(--color-controls-background);
+    font-size: 8vh;
+    border: none;
+    margin-right: 5vw;
+    padding: 0;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.content {
+    color: var(--color-foreground);
+    background-color: var(--color-background);
+    top: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+    font-family: sans-serif;
+    font-size: 2vh;
+}
+
+.settings {
+    margin-top: 10vh;
+    padding: 2vh;
+}
+
+.taskpage {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.task-list {
+    overflow-y: scroll;
+    max-height: 100%;
+}
+
+.task-list > li {
+    height: 20vh;
+    padding: 1vh;
+    border-top: 1px solid gray;
+}
+
+.task-list > li:first-child {
+    margin-top: 20vh;
+}
+
+.task-list > li:last-child {
+    margin-bottom: 40vh;
+    border-bottom: 1px solid gray;
+}
+
+.task-progress {
+    font-weight: bold;
+}
+
+.task-name {
+    font-size: 150%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.task-deadline {
+    margin-top: 1vh;
+}
+
+.task-deadline-overdue {
+    color: red;
+}
+
+.task-priority {
+    margin-top: 2vh;
+    text-align: right;
+}
+
+.task-details {
+    margin-top: 10vh;
+    padding: 2vh;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 2vh;
+}
+
+.task-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.task-name-input {
+    color: var(--color-foreground);
+    background-color: var(--color-background);
+    font-size: 200%;
+    font-weight: bold;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.task-effective-deadline-label {
+    color: gray;
+}
+
+.task-select-box {
+    color: var(--color-foreground);
+    background-color: var(--color-background);
+    border: 1px solid var(--color-foreground);
+    font-size: 2vh;
+    padding: 1vh;
+}
+
+.dependency-list-item {
+    color: var(--color-foreground);
+    background-color: var(--color-background);
+    border: 1px solid var(--color-foreground);
+    padding: 0.5vh;
+    margin-bottom: 1vh;
+    box-shadow: 2px 2px gray;
+    flex-shrink: 2;
+}
+
+.remove-dependency {
+    color: red;
+    background-color: var(--color-background);
+    border: none;
+    font-size: 150%;
+    padding: 0;
+}
+
+.task-add-dependency {
+    color: var(--color-foreground);
+    background-color: var(--color-background);
+    align-self: start;
+    padding: 0.5em;
+    border: 1px solid var(--color-background);
+    padding: 0.5vh;
+}
+
+.task-progress-input-disabled {
+    color: gray;
+    border: 1px solid gray;
+    font-size: 2vh;
+    padding: 1vh;
+}
+
+.task-horizontal-group {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+    align-items: baseline;
+}
+
+.task-vertical-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.task-description-input {
+    color: var(--color-foreground);
+    background-color: var(--color-background);
+    width: 100%;
+}
+
+.remove-task-button {
+    color: red;
+    background-color: var(--color-controls-background);
+    border: 1px solid black;
+    padding: 1vh;
+    margin: 2vh;
+    align-self: end;
+}

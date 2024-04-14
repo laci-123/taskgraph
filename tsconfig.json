@@ -1,7 +1,7 @@
 {
     "compilerOptions":
     {
-        "outDir": "./dist/",
+        "outDir": "./docs/",
         "strict": true,
         "noImplicitAny": true,
         "skipLibCheck": true,

@@ -16,6 +16,6 @@ TODO-app with dependency management.
   * Recurring tasks
   * Graphical representation of the relations between tasks
 
-![screenshot](./doc/screenshot_1.png)
-![screenshot](./doc/screenshot_2.png)
-![screenshot](./doc/screenshot_3.png)
+![screenshot](./readme/screenshot_1.png)
+![screenshot](./readme/screenshot_2.png)
+![screenshot](./readme/screenshot_3.png)
