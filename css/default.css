@@ -7,6 +7,15 @@
 
 body {
     height: 100dvh;
+    --color-background: white;
+    --color-foreground: black;
+    --color-controls-background: green;
+    --color-controls-foreground: white;
+}
+
+.dark-mode {
+    --color-background: black;
+    --color-foreground: white;
 }
 
 #root > * {
@@ -22,27 +31,27 @@ body {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    background-color: green;
+    background-color: var(--color-controls-background);
     padding: 2vh;
 }
 
 .main-selector {
-    color: white;
-    background-color: green;
-    border: 1px solid white;
+    color: var(--color-controls-foreground);
+    background-color: var(--color-controls-background);
+    border: 1px solid var(--color-controls-foreground);
     font-size: 2vh;
     padding: 1vh;
 }
 
 .top-controls-button {
-    color: white;
-    background-color: green;
+    color: var(--color-controls-foreground);
+    background-color: var(--color-controls-background);
     font-size: 5vh;
     border: none;
 }
 
 .top-controls-text {
-    color: white;
+    color: var(--color-controls-foreground);
     font-size: 3vh;
     font-family: sans-serif;
 }
@@ -60,15 +69,12 @@ body {
 
 .floating-button {
     height: 50%;
-    color: white;
-    background-color: green;
+    color: var(--color-controls-foreground);
+    background-color: var(--color-controls-background);
     font-size: 8vh;
     border: none;
     margin-right: 5vw;
     padding: 0;
-}
-
-.circular {
     aspect-ratio: 1 / 1;
     border-radius: 50%;
     display: flex;
@@ -77,12 +83,19 @@ body {
 }
 
 .content {
+    color: var(--color-foreground);
+    background-color: var(--color-background);
     top: 0;
     height: 100%;
     width: 100%;
     z-index: 1;
     font-family: sans-serif;
     font-size: 2vh;
+}
+
+.settings {
+    margin-top: 10vh;
+    padding: 2vh;
 }
 
 .taskpage {
@@ -117,7 +130,7 @@ body {
 
 .task-name {
     font-size: 150%;
-    white-space: nowrap;
+    var(--color-controls-foreground-space: nowrap);
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -162,7 +175,7 @@ body {
 
 .task-select-box {
     color: black;
-    background-color: white;
+    background-color: var(--color-controls-foreground);
     border: 1px solid black;
     font-size: 2vh;
     padding: 1vh;
@@ -170,7 +183,7 @@ body {
 
 .dependency-list-item {
     color: black;
-    background-color: white;
+    background-color: var(--color-controls-foreground);
     border: 1px solid black;
     padding: 0.5vh;
     margin-bottom: 1vh;
@@ -180,7 +193,7 @@ body {
 
 .remove-dependency {
     color: red;
-    background-color: white;
+    background-color: var(--color-controls-foreground);
     border: none;
     font-size: 150%;
     padding: 0;
@@ -218,7 +231,7 @@ body {
 
 .remove-task-button {
     color: red;
-    background-color: white;
+    background-color: var(--color-controls-foreground);
     border: 1px solid black;
     padding: 1vh;
     margin: 2vh;

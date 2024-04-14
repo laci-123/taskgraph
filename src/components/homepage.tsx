@@ -32,13 +32,13 @@ export default function HomePage(props: HomePageProps): ReactElement {
         <>
             <div className="top-controls">
                 <MainSelector selected={props.which_task_list} handleChange={props.handleChange} />
-                <button className="top-controls-button">⚙</button>
+                <button className="top-controls-button" onClick={() => navigate("/settings")}>⚙</button>
             </div>
             <div className="content">
                 <TaskList tasks={task_list(props.tg, props.which_task_list)} handleClick={null} />
             </div>
             <div className="bottom-controls">
-                <button className="floating-button circular" onClick={() => navigate(`/task/${props.tg.smallest_available_id}`)}>+</button>
+                <button className="floating-button" onClick={() => navigate(`/task/${props.tg.smallest_available_id}`)}>+</button>
             </div>
         </>
     );

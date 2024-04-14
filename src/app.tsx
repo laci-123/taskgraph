@@ -7,6 +7,7 @@ import TaskPage from "./components/taskpage";
 import { MainSelectorOptionKeys } from "./components/main_selector";
 import SelectorPage from "./components/selectorpage";
 import ErrorPage from "./components/errorpage";
+import SettingsPage from "./components/settingspage";
 
 
 interface AppState {
@@ -108,6 +109,7 @@ export default function App(): ReactElement {
                     <Route index element={homepage} />
                     <Route path="/task/:task_param" element={taskpage} />
                     <Route path="/selector/:task_id" element={selectorpage} />
+                    <Route path="/settings" element={<SettingsPage />} />
                     <Route path="*" element={homepage} />
                 </Route>
             </Routes>
