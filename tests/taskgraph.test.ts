@@ -371,15 +371,15 @@ test("agenda lists tasks in right order", () => {
     expect(agenda3[3].name).toEqual("buy bus pass");
 
     const tg4 = new TaskGraph([{id: 0, name: "fix car",      dependencies: [],  progress: "todo", priority: 1, deadline: new Date("2004-05-20")},
-                               {id: 1, name: "buy hammer",   dependencies: [],  progress: "todo", priority: 1, deadline: new Date("2004-05-21")},
+                               {id: 1, name: "buy hammer",   dependencies: [],  progress: "todo", priority: 1, deadline: "never"},
                                {id: 2, name: "go shopping",  dependencies: [],  progress: "todo", priority: 1, deadline: new Date("2004-05-22")},
                                {id: 3, name: "buy bus pass", dependencies: [],  progress: "todo", priority: 1, deadline: new Date("2004-05-23")}]);
     const agenda4 = tg4.agenda(new Date("2004-05-06"), one_day);
     expect(agenda4).toHaveLength(4);
     expect(agenda4[0].name).toEqual("fix car");
-    expect(agenda4[1].name).toEqual("buy hammer");
-    expect(agenda4[2].name).toEqual("go shopping");
-    expect(agenda4[3].name).toEqual("buy bus pass");
+    expect(agenda4[1].name).toEqual("go shopping");
+    expect(agenda4[2].name).toEqual("buy bus pass");
+    expect(agenda4[3].name).toEqual("buy hammer");
 });
 
 test("smallest available id", () => {

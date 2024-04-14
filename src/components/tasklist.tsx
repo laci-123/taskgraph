@@ -46,7 +46,7 @@ function scroll_to_bottom(e: HTMLElement) {
 export default function TaskList(props: TaskListProps): ReactElement {
     return (
         <ul className="task-list" ref={(x) => x && scroll_to_bottom(x)}>
-            {props.tasks.map((t) => task_to_list_item(t, props.handleClick))}
+            {props.tasks.reverse().map((t) => task_to_list_item(t, props.handleClick))}
         </ul>
     );
 }
