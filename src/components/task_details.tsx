@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { Progress, RawTask, Task } from "../task";
+import { RawTask, Task } from "../task";
 import TaskProgress from "./task_progress";
 import TaskDeadline from "./task_deadline";
 import TaskEffectiveDeadline from "./task_effective_deadline";
@@ -10,7 +10,6 @@ import UserList from "./user_list";
 
 interface TaskDetailsProps {
     task: Task;
-    enabled_progresses: Progress[];
     editor_state: RawTask;
     handleChange: (rt: RawTask) => void;
 }
@@ -27,7 +26,7 @@ export default function TaskDetails(props: TaskDetailsProps): ReactElement {
             <div className="task-horizontal-group">
                 <div>Progress:</div>
                 <TaskProgress progress={props.editor_state.progress ?? "todo"}
-                              enabled_progresses={props.enabled_progresses}
+                              enabled_progresses={props.task.depends_on.length > 0 ? ["todo", "failed"] : ["todo", "doing", "done", "failed"]}
                               is_failed_disabled={props.task.has_failed_dependency()}
                               handleChange={(p) => props.handleChange({...props.editor_state, progress: p})} />
             </div>

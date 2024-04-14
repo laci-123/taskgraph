@@ -61,7 +61,6 @@ function TaskPageInternal(props: TaskPageInternalProps): ReactElement {
             </div>
             <div className="content taskpage">
                 <TaskDetails task={props.task}
-                             enabled_progresses={["todo", "doing", "done", "failed"]}
                              editor_state={editorState.rt}
                              handleChange={(rt) => setEditorState({...editorState, rt: rt})} />
                 {
