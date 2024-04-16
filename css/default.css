@@ -243,3 +243,9 @@ body {
     margin: 2vh;
     align-self: end;
 }
+
+.settings {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}

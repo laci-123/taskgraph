@@ -115,7 +115,9 @@ export default function App(): ReactElement {
                                handleSave={(rt, remove) => setState(update_appstate(state, rt, remove))} />;
     const selectorpage = <SelectorPage tg={state.tg}
                                        handleSave={(rt) => setState(update_appstate(state, rt))} />;
-    const settingspage = <SettingsPage is_dark={state.dark_mode} handleChange={(is_dark) => setState({...state, dark_mode: is_dark})} />;
+    const settingspage = <SettingsPage tg={state.tg}
+                                       is_dark={state.dark_mode}
+                                       handleChange={(is_dark) => setState({...state, dark_mode: is_dark})} />;
 
     return (
         <HashRouter>

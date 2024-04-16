@@ -81,9 +81,14 @@ export class TaskGraph {
         }
     }
 
-    public to_json(): string {
+    public to_json(pretty_print?: "pretty-print"): string {
         const raw_tasks = this.all_tasks.map((t) => copy_RawTask_without_defaults(t.to_raw_task()));
-        return JSON.stringify(raw_tasks);
+        if(pretty_print) {
+            return JSON.stringify(raw_tasks, null, 4);
+        }
+        else {
+            return JSON.stringify(raw_tasks);
+        }
     }
 
     constructor(raw_tasks: RawTask[]) {
