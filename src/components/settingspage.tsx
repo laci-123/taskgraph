@@ -23,6 +23,7 @@ export default function SettingsPage(props: SettingsPageProps): ReactElement {
                         onChange={() => props.handleChange(!props.is_dark)}>
                     </input>
                     <label htmlFor="dark-mode">Dark mode</label>
+                <div>The quick brown fox jumps over the lazy dog.</div>
                 </div>
             </div>
         </>
