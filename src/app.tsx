@@ -6,9 +6,9 @@ import { TaskGraph } from "./taskgraph";
 import TaskPage from "./components/taskpage";
 import { MainSelectorOptionKeys } from "./components/main_selector";
 import SelectorPage from "./components/selectorpage";
-import ErrorPage from "./components/errorpage";
+import PageLayout from "./components/page_layout";
 import SettingsPage from "./components/settingspage";
-import toast from "react-hot-toast";
+import toast, { ToastOptions } from "react-hot-toast";
 import { mz } from "mehrzahl";
 
 
@@ -17,8 +17,9 @@ interface AppState {
     raw_tasks: RawTask[];
     dark_mode: boolean;
     tg: TaskGraph;
-    error: Error | null;
 }
+
+const toast_format: ToastOptions = {className: "toast", duration: 5000, position: "bottom-center"};
 
 function init_appstate(): AppState {
     const json = localStorage.getItem("tasks") ?? "[]";
@@ -30,17 +31,16 @@ function init_appstate(): AppState {
             raw_tasks: tg.all_tasks.map((t) => t.to_raw_task()),
             dark_mode: dark_mode,
             tg: tg,
-            error: null
         };
     }
     catch(e) {
         if(e instanceof Error) {
+            toast.error(e.toString(), toast_format);
             return {
                 which_task_list: "agenda",
                 raw_tasks: [],
                 dark_mode: dark_mode,
                 tg: new TaskGraph([]),
-                error: e
             };
         }
         else {
@@ -69,23 +69,12 @@ function update_appstate(app_state: AppState, rt: RawTask, remove?: "remove"): A
 
     try {
         const tg = new TaskGraph(raw_tasks);
-        return {
-            which_task_list: app_state.which_task_list,
-            dark_mode: app_state.dark_mode,
-            raw_tasks: raw_tasks,
-            tg: tg,
-            error: null
-        };
+        return {...app_state, raw_tasks, tg};
     }
     catch(e) {
         if(e instanceof Error) {
-            return {
-                which_task_list: app_state.which_task_list,
-                dark_mode: app_state.dark_mode,
-                raw_tasks: app_state.raw_tasks,
-                tg: app_state.tg,
-                error: e,
-            };
+            toast.error(e.toString(), toast_format);
+            return app_state;
         }
         else {
             throw e;
@@ -102,20 +91,14 @@ function import_tasks(app_state: AppState, tasks_json: string): AppState {
             dark_mode: app_state.dark_mode,
             raw_tasks: tasks.map((t) => t.to_raw_task()),
             tg: tg,
-            error: null
         };
-        toast.success(mz(tasks.length)`Imported $value {task|tasks}`, {className: "toast", duration: 5000, position: "bottom-center"});
+        toast.success(mz(tasks.length)`Imported $value {task|tasks}`, toast_format);
         return new_state;
     }
     catch(e) {
         if(e instanceof Error) {
-            return {
-                which_task_list: app_state.which_task_list,
-                dark_mode: app_state.dark_mode,
-                raw_tasks: app_state.raw_tasks,
-                tg: app_state.tg,
-                error: e,
-            };
+            toast.error(e.toString(), toast_format);
+            return app_state;
         }
         else {
             throw e;
@@ -155,7 +138,7 @@ export default function App(): ReactElement {
     return (
         <HashRouter>
             <Routes>
-                <Route element={<ErrorPage error={state.error} resetError={() => setState({...state, error: null})} />}>
+                <Route element={<PageLayout />}>
                     <Route path="/"/>
                     <Route path="/index.html" element={homepage} />
                     <Route index element={homepage} />
