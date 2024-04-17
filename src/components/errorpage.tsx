@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 import { Outlet } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 
 interface ErrorPageProps {
@@ -17,6 +18,11 @@ export default function ErrorPage(props: ErrorPageProps): ReactElement {
         );
     }
     else {
-        return <Outlet />;
+        return (
+            <>
+                <Toaster />
+                <Outlet />
+            </>
+        );
     }
 }

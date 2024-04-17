@@ -8,6 +8,7 @@ import { MainSelectorOptionKeys } from "./components/main_selector";
 import SelectorPage from "./components/selectorpage";
 import ErrorPage from "./components/errorpage";
 import SettingsPage from "./components/settingspage";
+import toast from "react-hot-toast";
 
 
 interface AppState {
@@ -94,13 +95,16 @@ function update_appstate(app_state: AppState, rt: RawTask, remove?: "remove"): A
 function import_tasks(app_state: AppState, tasks_json: string): AppState {
     try {
         const tg = TaskGraph.from_json(tasks_json);
-        return {
+        const tasks = tg.all_tasks;
+        const new_state = {
             which_task_list: app_state.which_task_list,
             dark_mode: app_state.dark_mode,
-            raw_tasks: tg.all_tasks.map((t) => t.to_raw_task()),
+            raw_tasks: tasks.map((t) => t.to_raw_task()),
             tg: tg,
             error: null
         };
+        toast.success(`Imported ${tasks.length} tasks`, {className: "toast", duration: 5000, position: "bottom-center"});
+        return new_state;
     }
     catch(e) {
         if(e instanceof Error) {

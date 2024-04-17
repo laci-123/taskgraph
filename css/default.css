@@ -262,3 +262,9 @@ body {
 .import-button {
     align-self: end;
 }
+
+.toast {
+    font-family: sans-serif;
+    border: 1px solid gray;
+    margin-bottom: 10vh;
+}
