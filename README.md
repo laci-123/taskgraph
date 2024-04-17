@@ -11,9 +11,9 @@ Try it [here](https://laci-123.github.io/taskgraph/).
     If a task failes then all that tasks that depend on it automatically become FAILED, too. 
   * Agenda view: a topological sort of all tasks. This means that all tasks are ordered by deadline and priority 
     but in such a way that a task never comes before any of its dependencies. 
+  * Export/import all tasks as a simple JSON file. 
     
 ## Coming soon
-  * Export/import all tasks as a simple JSON file. 
   * Recurring tasks
   * Graphical representation of the relations between tasks
 
