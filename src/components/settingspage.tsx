@@ -1,12 +1,14 @@
 import { ReactElement } from "react";
 import { useNavigate } from "react-router-dom";
 import { TaskGraph } from "../taskgraph";
+import TaskImport from "./task_import";
 
 
 interface SettingsPageProps {
     is_dark: boolean;
     tg: TaskGraph;
     handleChange: (is_dark: boolean) => void;
+    handleTaskImport: (tasks_json: string) => void;
 }
 
 export default function SettingsPage(props: SettingsPageProps): ReactElement {
@@ -28,6 +30,7 @@ export default function SettingsPage(props: SettingsPageProps): ReactElement {
                         <label htmlFor="dark-mode">Dark mode</label>
                     </div>
                     <a download={true} href={"data:application/json;charset=UTF-8," + encodeURIComponent(props.tg.to_json("pretty-print"))}>Export tasks</a>
+                    <TaskImport tg={props.tg} handleTaskImport={props.handleTaskImport} />
                 </div>
             </div>
         </>

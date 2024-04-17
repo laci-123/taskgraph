@@ -91,6 +91,33 @@ function update_appstate(app_state: AppState, rt: RawTask, remove?: "remove"): A
     }
 }
 
+function import_tasks(app_state: AppState, tasks_json: string): AppState {
+    try {
+        const tg = TaskGraph.from_json(tasks_json);
+        return {
+            which_task_list: app_state.which_task_list,
+            dark_mode: app_state.dark_mode,
+            raw_tasks: tg.all_tasks.map((t) => t.to_raw_task()),
+            tg: tg,
+            error: null
+        };
+    }
+    catch(e) {
+        if(e instanceof Error) {
+            return {
+                which_task_list: app_state.which_task_list,
+                dark_mode: app_state.dark_mode,
+                raw_tasks: app_state.raw_tasks,
+                tg: app_state.tg,
+                error: e,
+            };
+        }
+        else {
+            throw e;
+        }
+    }
+}
+
 export default function App(): ReactElement {
     const [state, setState] = useState<AppState>(init_appstate());
 
@@ -117,7 +144,8 @@ export default function App(): ReactElement {
                                        handleSave={(rt) => setState(update_appstate(state, rt))} />;
     const settingspage = <SettingsPage tg={state.tg}
                                        is_dark={state.dark_mode}
-                                       handleChange={(is_dark) => setState({...state, dark_mode: is_dark})} />;
+                                       handleChange={(is_dark) => setState({...state, dark_mode: is_dark})}
+                                       handleTaskImport={(tasks_json) => setState(import_tasks(state, tasks_json))} />
 
     return (
         <HashRouter>

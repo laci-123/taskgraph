@@ -419,6 +419,25 @@ test("create TaskGraph from JSON", () => {
     expect(() => TaskGraph.from_json(json5)).toThrow("cannot create TaskGraph from JSON");
 });
 
+test("create TaskGraph from pretty printed JSON", () => {
+    const json0 = `
+[
+    {
+        "id": 0,
+        "name": "buy stuff",
+        "deadline": "2024-04-15T00:00:00.000Z",
+        "dependencies": [
+            1
+        ]
+    },
+    {
+        "id": 1,
+        "name": "go shopping"
+    }
+]`
+    expect(TaskGraph.from_json(json0).all_tasks.length).toEqual(2);
+});
+
 test("convert TaskGraph to JSON", () => {
     const tg0 = new TaskGraph([]);
     expect(tg0.to_json()).toEqual("[]");
