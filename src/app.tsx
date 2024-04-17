@@ -9,6 +9,7 @@ import SelectorPage from "./components/selectorpage";
 import ErrorPage from "./components/errorpage";
 import SettingsPage from "./components/settingspage";
 import toast from "react-hot-toast";
+import { mz } from "mehrzahl";
 
 
 interface AppState {
@@ -103,7 +104,7 @@ function import_tasks(app_state: AppState, tasks_json: string): AppState {
             tg: tg,
             error: null
         };
-        toast.success(`Imported ${tasks.length} tasks`, {className: "toast", duration: 5000, position: "bottom-center"});
+        toast.success(mz(tasks.length)`Imported $value {task|tasks}`, {className: "toast", duration: 5000, position: "bottom-center"});
         return new_state;
     }
     catch(e) {
