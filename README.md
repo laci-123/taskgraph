@@ -15,6 +15,7 @@ Try it [here](https://laci-123.github.io/taskgraph/).
     
 ## Coming soon
   * Recurring tasks
+  * Reminders for upcoming tasks
   * Graphical representation of the relations between tasks
 
 ![screenshot](./readme/screenshot_1.png)
