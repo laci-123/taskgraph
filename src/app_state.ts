@@ -1,12 +1,18 @@
 import { MainSelectorOptionKeys } from "./components/main_selector";
 import { RawTask } from "./task";
 import { TaskGraph } from "./taskgraph";
-import toast, { ToastOptions } from "react-hot-toast";
 import { mz } from "mehrzahl";
 
 
-const toast_format: ToastOptions = {className: "toast", duration: 5000, position: "bottom-center"};
+export interface StatusReporter {
+    success: (msg: string) => void;
+    error: (msg: string) => void;
+}
 
+
+// This is not a class on purpose!
+// AppState has to work with the useState React hook,
+// which uses some serialization thechnique that breaks class instances. 
 export interface AppState {
     which_task_list: MainSelectorOptionKeys;
     raw_tasks: RawTask[];
@@ -14,9 +20,9 @@ export interface AppState {
     tg: TaskGraph;
 }
 
-export function init_appstate(): AppState {
-    const json = localStorage.getItem("tasks") ?? "[]";
-    const dark_mode = localStorage.getItem("dark-mode") === "true";
+export function init_appstate(sr: StatusReporter, storage: Storage): AppState {
+    const json = storage.getItem("tasks") ?? "[]";
+    const dark_mode = storage.getItem("dark-mode") === "true";
     try {
         const tg = TaskGraph.from_json(json);
         return {
@@ -28,7 +34,7 @@ export function init_appstate(): AppState {
     }
     catch(e) {
         if(e instanceof Error) {
-            toast.error(e.toString(), toast_format);
+            sr.error(e.message);
             return {
                 which_task_list: "agenda",
                 raw_tasks: [],
@@ -42,7 +48,7 @@ export function init_appstate(): AppState {
     }
 }
 
-export function update_appstate(app_state: AppState, rt: RawTask, remove?: "remove"): AppState {
+export function update_appstate(sr: StatusReporter, app_state: AppState, rt: RawTask, remove?: "remove"): AppState {
     const raw_tasks = [];
     let found = false;
     for(const art of app_state.raw_tasks) {
@@ -66,7 +72,7 @@ export function update_appstate(app_state: AppState, rt: RawTask, remove?: "remo
     }
     catch(e) {
         if(e instanceof Error) {
-            toast.error(e.toString(), toast_format);
+            sr.error(e.message);
             return app_state;
         }
         else {
@@ -75,7 +81,7 @@ export function update_appstate(app_state: AppState, rt: RawTask, remove?: "remo
     }
 }
 
-export function import_tasks(app_state: AppState, tasks_json: string): AppState {
+export function import_tasks(sr: StatusReporter, app_state: AppState, tasks_json: string): AppState {
     try {
         const tg = TaskGraph.from_json(tasks_json);
         const tasks = tg.all_tasks;
@@ -85,12 +91,12 @@ export function import_tasks(app_state: AppState, tasks_json: string): AppState 
             raw_tasks: tasks.map((t) => t.to_raw_task()),
             tg: tg,
         };
-        toast.success(mz(tasks.length)`Imported $value {task|tasks}`, toast_format);
+        sr.success(mz(tasks.length)`Imported $value {task|tasks}`);
         return new_state;
     }
     catch(e) {
         if(e instanceof Error) {
-            toast.error(e.toString(), toast_format);
+            sr.error(e.message);
             return app_state;
         }
         else {
