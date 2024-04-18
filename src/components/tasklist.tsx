@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import { Task } from "../task";
 import { Link } from "react-router-dom";
-import { date_to_YMD_or } from "../maybedate";
+import { date_to_relative_string } from "../maybedate";
 
 
 interface TaskListProps {
@@ -16,7 +16,7 @@ function task_to_list_item(task: Task, handleClick: ((task_id: number) => void) 
             <div className="task-progress">{task.progress}</div>
             <div className="task-name">{task.name}</div>
             <div className={`task-deadline ${task_is_overdue ? "task-deadline-overdue" : ""}`}>
-                {date_to_YMD_or(task.effective_deadline, "-", "-")}
+                {date_to_relative_string(task.effective_deadline, new Date(), "-", "-")}
             </div>
             <div className="task-priority">{`priority: ${task.priority}`}</div>
         </>

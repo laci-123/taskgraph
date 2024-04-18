@@ -17,6 +17,17 @@ export function date_to_YMD_or(date: Date, min_representation: string, max_reper
     return date_to_YMD(date);
 }
 
+export function date_to_relative_string(date: Date, now: Date, min_representation: string, max_reperesentation: string): string {
+    const days = days_between(date, now);
+    const rtf = new Intl.RelativeTimeFormat("en", {numeric: "auto"});
+    if(-7 < days && days < 7) {
+        return rtf.format(Math.round(days), "day");
+    }
+    else {
+        return date_to_YMD_or(date, min_representation, max_reperesentation);
+    }
+}
+
 export function days_between(d1: Date, d2: Date): number {
     return (d1.getTime() - d2.getTime()) / (24 * 60 * 60 * 1000);
 }
