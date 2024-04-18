@@ -42,12 +42,12 @@ export default function TaskDeadline(props: TaskDeadlineProps): ReactElement {
     }
     else {
         return (
-            <div className="task-vertical-group">
+            <div className="task-vertical-group bordered-group">
                 <div>
                     <input name="task-has-deadline"
                            type="checkbox"
                            checked={true}
-                           onChange={(e) => {props.handleChange(e.target.checked ? new Date() : DATE_MAX);}}>
+                           onChange={() => set_deadline(DATE_MAX)}>
                     </input>
                     <label htmlFor="task-has-deadline">Deadline</label>
                 </div>

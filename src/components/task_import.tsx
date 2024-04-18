@@ -28,7 +28,7 @@ export default function TaskImport(props: TaskImportProps): ReactElement {
     }
     
     return (
-        <div className="import-group">
+        <div className="import-group bordered-group">
             <div>Import tasks</div>
             <input type="file" ref={file_input} />
             <button className="import-button" onClick={read_file}>Import</button>

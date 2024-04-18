@@ -234,6 +234,11 @@ body {
     flex-direction: column;
 }
 
+.bordered-group {
+    border: 1px solid var(--color-foreground);
+    padding: 1vh;
+}
+
 .task-description-input {
     color: var(--color-foreground);
     background-color: var(--color-background);
@@ -266,8 +271,6 @@ body {
     flex-direction: column;
     gap: 1vh;
     max-width: 30em;
-    border: 1px solid var(--color-foreground);
-    padding: 1vh;
 }
 
 .import-button {
