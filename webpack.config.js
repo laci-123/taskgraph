@@ -24,6 +24,10 @@ module.exports = {
                 "manifest.json",
                 "sw.js",
                 "css/*",
+                {
+                    from: "node_modules/react-day-picker/dist/style.css",
+                    to: "css/react-day-picker/dist/style.css"
+                },
                 "img/*.png"
             ],
         }),

@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 import { DATE_MAX } from "../date_utils";
+import { DayPicker } from "react-day-picker";
 
 
 interface TaskDeadlineProps {
@@ -8,6 +9,16 @@ interface TaskDeadlineProps {
 }
 
 export default function TaskDeadline(props: TaskDeadlineProps): ReactElement {
+    function handleSelect(date: Date | undefined) {
+        if(date) {
+            const timezone_offset = date.getTimezoneOffset() * 60 * 1000;
+            props.handleChange(new Date(date.getTime() - timezone_offset));
+        }
+        else {
+            props.handleChange(props.deadline);
+        }
+    }
+    
     if(props.deadline >= DATE_MAX) {
         return( 
             <div className="task-vertical-group">
@@ -33,10 +44,7 @@ export default function TaskDeadline(props: TaskDeadlineProps): ReactElement {
                     </input>
                     <label htmlFor="task-has-deadline">Deadline</label>
                 </div>
-                <input type="date"
-                       value={props.deadline.toISOString().split("T")[0]}
-                       onChange={(e) => {props.handleChange(e.target.valueAsDate!);}}>
-                </input>
+                <DayPicker mode="single" weekStartsOn={1/*Monday*/} selected={props.deadline} onSelect={handleSelect} />
             </div>
         );
     }
