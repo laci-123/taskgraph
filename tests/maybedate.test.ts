@@ -1,4 +1,4 @@
-import { DATE_MIN, DATE_MAX, date_to_YMD, date_to_YMD_or, date_to_relative_string } from "../src/maybedate";
+import { DATE_MIN, DATE_MAX, date_to_YMD, date_to_YMD_or, date_to_relative_string } from "../src/date_utils";
 
 
 test("DATE_MIN is the smallest posible Date", () => {

@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { DATE_MAX } from "../maybedate";
+import { DATE_MAX } from "../date_utils";
 
 
 interface TaskDeadlineProps {

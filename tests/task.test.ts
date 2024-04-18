@@ -1,4 +1,4 @@
-import { DATE_MAX } from "../src/maybedate";
+import { DATE_MAX } from "../src/date_utils";
 import {Task, compare_tasks} from "../src/task";
 
 

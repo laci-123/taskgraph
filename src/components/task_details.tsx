@@ -6,7 +6,7 @@ import TaskEffectiveDeadline from "./task_effective_deadline";
 import TaskPriority from "./task_priority";
 import DependencyList from "./dependency_list";
 import UserList from "./user_list";
-import { DATE_MAX } from "../maybedate";
+import { DATE_MAX } from "../date_utils";
 
 
 interface TaskDetailsProps {

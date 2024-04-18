@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import { Task } from "../task";
 import { Link } from "react-router-dom";
-import { date_to_relative_string } from "../maybedate";
+import { date_to_relative_string } from "../date_utils";
 
 
 interface TaskListProps {
