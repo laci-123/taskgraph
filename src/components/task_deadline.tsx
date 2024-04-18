@@ -33,7 +33,7 @@ export default function TaskDeadline(props: TaskDeadlineProps): ReactElement {
                     <input name="task-has-deadline"
                            type="checkbox"
                            checked={false}
-                           onChange={(e) => {props.handleChange(e.target.checked ? new Date() : DATE_MAX);}}>
+                           onChange={() => {set_deadline(new Date())}}>
                     </input>
                     <label htmlFor="task-has-deadline">Deadline</label>
                 </div>
