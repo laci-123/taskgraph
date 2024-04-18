@@ -10,15 +10,9 @@ export default function TaskPriority(props: TaskPriorityProps): ReactElement {
     return (
         <div className="task-horizontal-group">
             <div>Priority:</div>
-            <input type="number"
-                   value={props.priority}
-                   onChange={(e) => {
-                       const x = e.target.valueAsNumber;
-                       if(!isNaN(x)) {
-                           props.handleChange(x);
-                       }
-                   }}>
-            </input>
+            <button className="task-priority-button" onClick={() => props.handleChange(props.priority - 1)}>-</button>
+            <div>{props.priority}</div>
+            <button className="task-priority-button" onClick={() => props.handleChange(props.priority + 1)}>+</button>
         </div>
     );
 }
