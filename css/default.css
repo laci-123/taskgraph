@@ -243,6 +243,7 @@ body {
     color: var(--color-foreground);
     background-color: var(--color-background);
     width: 100%;
+    font-size: 2vh;
 }
 
 .daypicker-today {
