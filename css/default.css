@@ -240,6 +240,11 @@ body {
     width: 100%;
 }
 
+.daypicker-today {
+    font-weight: bold;
+    border: 1px solid var(--color-foreground);
+}
+
 .remove-task-button {
     color: red;
     background-color: var(--color-background);

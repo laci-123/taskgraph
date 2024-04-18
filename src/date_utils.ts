@@ -28,6 +28,10 @@ export function date_to_relative_string(date: Date, now: Date, min_representatio
     }
 }
 
+export function in_n_days(n: number): Date {
+    return new Date(Date.now() + n * 24 * 60 * 60 * 1000);
+}
+
 export function days_between(d1: Date, d2: Date): number {
     return (d1.getTime() - d2.getTime()) / (24 * 60 * 60 * 1000);
 }
