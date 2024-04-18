@@ -1,4 +1,4 @@
-import {MaybeDate, compare_dates} from "./maybedate";
+import { DATE_MAX, DATE_MIN } from "./maybedate";
 import {Task, RawTask, compare_tasks, Progress, asRawTaskArray, copy_RawTask_without_defaults} from "./task";
 import PriorityQueue from "priority-queue-typescript";
 
@@ -98,7 +98,10 @@ export class TaskGraph {
         // convert raw tasks to tasks, filling in missing values with defaults
         for(const rt of raw_tasks) {
             // effective priority and effective deadline are by default the same as priority and deadline
-            const task = new Task(rt.id, rt.name, rt.description, rt.priority, rt.deadline, rt.priority, rt.deadline, rt.birthline,
+            const task = new Task(rt.id, rt.name, rt.description,
+                                  rt.priority, new Date(rt.deadline ?? DATE_MAX),
+                                  rt.priority, new Date(rt.deadline ?? DATE_MAX),
+                                  new Date(rt.birthline ?? DATE_MIN),
                                   rt.progress === "blocked" ? "todo" : rt.progress); // a task cannot be blocked on its own, it can only be marked so based on its dependencies
             this.tasks.set(rt.id, task);
             if(!rt.dependencies || rt.dependencies.length === 0) {
@@ -144,7 +147,7 @@ export class TaskGraph {
     }
 }
 
-function propagate(task: Task, colors: Map<Task, "white" | "grey" | "black">): {max_priority: number, min_deadline: MaybeDate} {
+function propagate(task: Task, colors: Map<Task, "white" | "grey" | "black">): {max_priority: number, min_deadline: Date} {
     const color = colors.get(task);
     if(color === "grey") {
         throw new Error("Circular dependencies");
@@ -168,7 +171,7 @@ function propagate(task: Task, colors: Map<Task, "white" | "grey" | "black">): {
         if(result.max_priority > task.effective_priority) {
             task.effective_priority = result.max_priority;
         }
-        if(compare_dates(result.min_deadline, task.effective_deadline) < 0) {
+        if(result.min_deadline < task.effective_deadline) {
             task.effective_deadline = result.min_deadline;
         }
     }

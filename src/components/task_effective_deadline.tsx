@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 import { Task } from "../task";
+import { DATE_MAX } from "../maybedate";
 
 
 interface TaskEffectiveDeadlineProps {
@@ -7,7 +8,7 @@ interface TaskEffectiveDeadlineProps {
 }
 
 export default function TaskEffectiveDeadline(props: TaskEffectiveDeadlineProps): ReactElement {
-    if(props.task.effective_deadline !== props.task.deadline && props.task.effective_deadline !== "never") {
+    if(props.task.effective_deadline !== props.task.deadline && props.task.effective_deadline <= DATE_MAX) {
         return (
             <div className="task-effective-deadline-label">
                 Computed: {props.task.effective_deadline.toISOString().split("T")[0]}

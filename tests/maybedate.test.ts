@@ -1,39 +1,22 @@
-import {compare_dates, maybedate_to_string_or} from "../src/maybedate";
+import { DATE_MIN, DATE_MAX, date_to_YMD, date_to_YMD_or } from "../src/maybedate";
 
-test("if neither date is 'never' then they compare like regular dates", () => {
-    const x1 = new Date("2000-01-01");
-    const y1 = new Date("2000-01-20");
-    expect(compare_dates(x1, y1)).toBeLessThan(0);
 
-    const x2 = new Date("2010-01-01");
-    const y2 = new Date("2010-01-01");
-    expect(compare_dates(x2, y2)).toEqual(0);
-
-    const x3 = new Date("2020-01-01");
-    const y3 = new Date("2000-01-01");
-    expect(compare_dates(x3, y3)).toBeGreaterThan(0);
+test("DATE_MIN is the smallest posible Date", () => {
+    expect(new Date(DATE_MIN.getTime()).toString()).not.toEqual("Invalid Date");
+    expect(new Date(DATE_MIN.getTime() - 1).toString()).toEqual("Invalid Date");
 });
 
-test("'never' equals 'never'", () => {
-    const x = "never";
-    const y = "never";
-    expect(compare_dates(x, y)).toEqual(0);
+test("DATE_MAX is the largest posible Date", () => {
+    expect(new Date(DATE_MAX.getTime()).toString()).not.toEqual("Invalid Date");
+    expect(new Date(DATE_MAX.getTime() + 1).toString()).toEqual("Invalid Date");
 });
 
-test("every regular date is sooner than 'never'", () => {
-    const x1 = new Date("2001-02-03");
-    const y1 = "never";
-    expect(compare_dates(x1, y1)).toBeLessThan(0);
-
-    const x2 = "never";
-    const y2 = new Date("2003-02-01");
-    expect(compare_dates(x2, y2)).toBeGreaterThan(0);
+test("YYYY-MM-DD representation of date", () => {
+    expect(date_to_YMD(new Date("2024-05-06"))).toEqual("2024-05-06");
 });
 
-test("converting to string", () => {
-    const x1 = new Date("2023-04-05");
-    expect(maybedate_to_string_or(x1, "-")).toEqual("2023-04-05");
-
-    const x2 = "never";
-    expect(maybedate_to_string_or(x2, "-")).toEqual("-");
+test("YYYY-MM-DD representation of date with DATE_MIN and DATE_MAX values", () => {
+    expect(date_to_YMD_or(new Date("2025-06-07"), "before everything", "after everything")).toEqual("2025-06-07");
+    expect(date_to_YMD_or(DATE_MIN, "before everything", "after everything")).toEqual("before everything");
+    expect(date_to_YMD_or(DATE_MAX, "before everything", "after everything")).toEqual("after everything");
 });

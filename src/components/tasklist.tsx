@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import { Task } from "../task";
-import { maybedate_to_string_or, is_maybedate_overdue } from "../maybedate";
 import { Link } from "react-router-dom";
+import { date_to_YMD_or } from "../maybedate";
 
 
 interface TaskListProps {
@@ -10,13 +10,13 @@ interface TaskListProps {
 }
 
 function task_to_list_item(task: Task, handleClick: ((task_id: number) => void) | null): ReactElement {
-    const now = new Date();
+    const task_is_overdue = task.effective_deadline.getTime() < Date.now();
     const content = (
         <>
             <div className="task-progress">{task.progress}</div>
             <div className="task-name">{task.name}</div>
-            <div className={`task-deadline ${is_maybedate_overdue(task.effective_deadline, now) ? "task-deadline-overdue" : ""}`}>
-                {maybedate_to_string_or(task.effective_deadline, "-")}
+            <div className={`task-deadline ${task_is_overdue ? "task-deadline-overdue" : ""}`}>
+                {date_to_YMD_or(task.effective_deadline, "-", "-")}
             </div>
             <div className="task-priority">{`priority: ${task.priority}`}</div>
         </>

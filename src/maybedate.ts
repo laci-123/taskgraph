@@ -1,50 +1,22 @@
-export type MaybeDate = Date | "never";
+// largest and smallest dates that JavaScript can represent
+// source: https://262.ecma-international.org/11.0/#sec-time-values-and-time-range
+export const DATE_MAX = new Date(+8640000000000000); 
+export const DATE_MIN = new Date(-8640000000000000);
 
-export function is_maybedate_overdue(md: MaybeDate, now: Date) {
-    return compare_dates(md, now) <= 0;
+export function date_to_YMD(date: Date): string {
+    return date.toISOString().split("T")[0];
 }
 
-export function maybedate_to_string_or(md: MaybeDate, never_representation: string) {
-    if(md === "never") {
-        return never_representation;
+export function date_to_YMD_or(date: Date, min_representation: string, max_reperesentation: string): string {
+    if(date.getTime() <= DATE_MIN.getTime()) {
+        return min_representation;
     }
-    else {
-        return md.toISOString().split("T")[0];
+    if(date.getTime() >= DATE_MAX.getTime()) {
+        return max_reperesentation;
     }
+    return date_to_YMD(date);
 }
 
-export function get_time(md: MaybeDate): number {
-    if(md === "never") {
-        return Number.POSITIVE_INFINITY;
-    }
-    else {
-        return md.getTime();
-    }
-}
-
-export function compare_dates(a: MaybeDate, b: MaybeDate): number {
-    if(a === "never") {
-        if(b === "never") {
-            return 0;
-        }
-        else {
-            return +1;
-        }
-    }
-    else {
-        if(b === "never") {
-            return -1;
-        }
-        else {
-            if(a < b) {
-                return -1;
-            }
-            else if (a > b) {
-                return +1;
-            }
-            else {
-                return 0;
-            }
-        }
-    }
+export function days_between(d1: Date, d2: Date): number {
+    return (d1.getTime() - d2.getTime()) / (24 * 60 * 60 * 1000);
 }

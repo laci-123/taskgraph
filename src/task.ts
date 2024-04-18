@@ -1,4 +1,4 @@
-import {MaybeDate, compare_dates, get_time} from "./maybedate";
+import {DATE_MIN, DATE_MAX} from "./maybedate";
 
 
 export const progress_type_values = ["blocked", "todo", "started", "done", "failed"] as const;
@@ -14,8 +14,8 @@ export interface RawTask {
     name: string,
     description?: string,
     priority?: number,
-    deadline?: MaybeDate,
-    birthline?: MaybeDate,
+    deadline?: number,
+    birthline?: number,
     progress?: Progress,
     dependencies?: number[],
 }
@@ -29,10 +29,10 @@ export function copy_RawTask_without_defaults(rt: RawTask): RawTask {
     if(priority !== 0) {
         new_rt.priority = priority;
     }
-    if(deadline !== "never") {
+    if(deadline && deadline < DATE_MAX.getTime()) {
         new_rt.deadline = deadline;
     }
-    if(birthline !== "never") {
+    if(birthline && birthline > DATE_MIN.getTime()) {
         new_rt.birthline = birthline;
     }
     if(progress !== "blocked" && progress !== "todo") {
@@ -75,10 +75,10 @@ export class Task {
         public name: string,
         public description: string = "",
         public priority: number = 0,
-        public deadline: MaybeDate = "never",
+        public deadline: Date = new Date(DATE_MAX),
         public effective_priority: number = priority,
-        public effective_deadline: MaybeDate = deadline,
-        public birthline: MaybeDate = "never",
+        public effective_deadline: Date = deadline,
+        public birthline: Date = new Date(DATE_MIN),
         public progress: Progress = "todo",
         public depends_on: Task[] = [],
         public needed_by: Task[] = [])
@@ -92,11 +92,11 @@ export class Task {
         if(this.priority !== 0) {
             rt.priority = this.priority;
         }
-        if(this.deadline !== "never") {
-            rt.deadline = this.deadline;
+        if(this.deadline <= DATE_MAX) {
+            rt.deadline = this.deadline.getTime();
         }
-        if(this.birthline !== "never") {
-            rt.birthline = this.birthline;
+        if(this.birthline >= DATE_MIN) {
+            rt.birthline = this.birthline.getTime();
         }
         if(this.progress !== "todo") {
             rt.progress = this.progress;
@@ -136,15 +136,21 @@ function compare_tasks_regardless_of_deadline(a: Task, b: Task): number {
     else if(a.effective_priority < b.effective_priority) {
         return +1;
     }
+    else if(a.effective_deadline < b.effective_deadline) {
+        return -1;
+    }
+    else if(a.effective_deadline > b.effective_deadline) {
+        return +1;
+    }
     else {
-        return compare_dates(a.effective_deadline, b.effective_deadline);
+        return 0;
     }
 }
 
 export function compare_tasks(now: Date, close_to_deadline: number): (a: Task, b: Task) => number {
     return (a, b) => {
-        const a_is_due = get_time(a.effective_deadline) - now.getTime() < close_to_deadline;
-        const b_is_due = get_time(b.effective_deadline) - now.getTime() < close_to_deadline;
+        const a_is_due = a.effective_deadline.getTime() - now.getTime() < close_to_deadline;
+        const b_is_due = b.effective_deadline.getTime() - now.getTime() < close_to_deadline;
         if(a_is_due) {
             if(b_is_due) {
                 return compare_tasks_regardless_of_deadline(a, b);

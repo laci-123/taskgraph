@@ -6,6 +6,7 @@ import TaskEffectiveDeadline from "./task_effective_deadline";
 import TaskPriority from "./task_priority";
 import DependencyList from "./dependency_list";
 import UserList from "./user_list";
+import { DATE_MAX } from "../maybedate";
 
 
 interface TaskDetailsProps {
@@ -40,8 +41,8 @@ export default function TaskDetails(props: TaskDetailsProps): ReactElement {
                 </textarea>
             </div>
             <div className="task-vertical-group">
-                <TaskDeadline deadline={props.editor_state.deadline || "never"}
-                              handleChange={(e) => props.handleChange({...props.editor_state, deadline: e})} />
+                <TaskDeadline deadline={props.editor_state.deadline ? new Date(props.editor_state.deadline) : DATE_MAX}
+                              handleChange={(e) => props.handleChange({...props.editor_state, deadline: e.getTime()})} />
                 <TaskEffectiveDeadline task={props.task} />
             </div>
             <TaskPriority priority={props.editor_state.priority || 0}

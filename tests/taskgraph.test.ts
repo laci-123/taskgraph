@@ -1,3 +1,4 @@
+import { DATE_MAX, DATE_MIN } from "../src/maybedate";
 import {TaskGraph} from "../src/taskgraph";
 
 
@@ -16,9 +17,9 @@ test("TaskGraph with one task (with missing fields) constructs properly", () => 
     expect(task.description).toEqual("");
     expect(task.priority).toEqual(0);
     expect(task.effective_priority).toEqual(0);
-    expect(task.deadline).toEqual("never");
-    expect(task.effective_deadline).toEqual("never");
-    expect(task.birthline).toEqual("never");
+    expect(task.deadline).toEqual(DATE_MAX);
+    expect(task.effective_deadline).toEqual(DATE_MAX);
+    expect(task.birthline).toEqual(DATE_MIN);
     expect(task.progress).toEqual("todo");
     expect(task.depends_on).toHaveLength(0);
     expect(task.needed_by).toHaveLength(0);
@@ -29,8 +30,8 @@ test("TaskGraph with one task (without missing fields) constructs properly", () 
                                name: "do something",
                                description: "Do something!",
                                priority: -1,
-                               deadline: new Date("2025-06-07"),
-                               birthline: "never",
+                               deadline: new Date("2025-06-07").getTime(),
+                               birthline: DATE_MIN.getTime(),
                                progress: "started",
                                dependencies: []}]);
     const tasks = tg.all_tasks;
@@ -43,7 +44,7 @@ test("TaskGraph with one task (without missing fields) constructs properly", () 
     expect(task.effective_priority).toEqual(-1);
     expect(task.deadline).toEqual(new Date("2025-06-07"));
     expect(task.effective_deadline).toEqual(new Date("2025-06-07"));
-    expect(task.birthline).toEqual("never");
+    expect(task.birthline).toEqual(DATE_MIN);
     expect(task.progress).toEqual("started");
     expect(task.depends_on).toHaveLength(0);
     expect(task.needed_by).toHaveLength(0);
@@ -60,7 +61,7 @@ test("TaskGraph with multiple independent tasks constructs properly", () => {
     expect(task1.id).toBe(1)
     expect(task1.name).toEqual("do something");
     expect(task1.effective_priority).toEqual(0);
-    expect(task1.effective_deadline).toEqual("never");
+    expect(task1.effective_deadline).toEqual(DATE_MAX);
     expect(task1.depends_on).toHaveLength(0);
     expect(task1.needed_by).toHaveLength(0);
 
@@ -68,7 +69,7 @@ test("TaskGraph with multiple independent tasks constructs properly", () => {
     expect(task2.id).toBe(2)
     expect(task2.name).toEqual("eat an apple");
     expect(task2.effective_priority).toEqual(0);
-    expect(task2.effective_deadline).toEqual("never");
+    expect(task2.effective_deadline).toEqual(DATE_MAX);
     expect(task2.depends_on).toHaveLength(0);
     expect(task2.needed_by).toHaveLength(0);
 
@@ -76,16 +77,16 @@ test("TaskGraph with multiple independent tasks constructs properly", () => {
     expect(task3.id).toBe(3)
     expect(task3.name).toEqual("go to sleep");
     expect(task3.effective_priority).toEqual(0);
-    expect(task3.effective_deadline).toEqual("never");
+    expect(task3.effective_deadline).toEqual(DATE_MAX);
     expect(task3.depends_on).toHaveLength(0);
     expect(task3.needed_by).toHaveLength(0);
 });
 
 test("get task by id", () => {
-    const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("2030-02-01"), priority: 5,  dependencies: [1, 2]},
-                              {id: 1, name: "buy some food",  deadline: new Date("2030-02-05"), priority: 8,  dependencies: [3]},
-                              {id: 2, name: "buy a stove",    deadline: new Date("2030-01-30"), priority: -1, dependencies: [3]},
-                              {id: 3, name: "get some money", deadline: "never",                priority: 0,  dependencies: []}]);
+    const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("2030-02-01").getTime(), priority: 5,  dependencies: [1, 2]},
+                              {id: 1, name: "buy some food",  deadline: new Date("2030-02-05").getTime(), priority: 8,  dependencies: [3]},
+                              {id: 2, name: "buy a stove",    deadline: new Date("2030-01-30").getTime(), priority: -1, dependencies: [3]},
+                              {id: 3, name: "get some money", deadline: DATE_MAX.getTime(),               priority: 0,  dependencies: []}]);
 
     const task0 = tg.get_task_by_id(0);
     expect(task0).toBeDefined();
@@ -107,10 +108,10 @@ test("deadlines and priorities propagate correctly (one root)", () => {
     //               |                                                 |
     //               |                                                 |
     //               +---------->"get some money" never (0) <----------+
-    const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("2030-02-01"), priority: 5,  dependencies: [1, 2]},
-                              {id: 1, name: "buy some food",  deadline: new Date("2030-02-05"), priority: 8,  dependencies: [3]},
-                              {id: 2, name: "buy a stove",    deadline: new Date("2030-01-30"), priority: -1, dependencies: [3]},
-                              {id: 3, name: "get some money", deadline: "never",                priority: 0,  dependencies: []}]);
+    const tg = new TaskGraph([{id: 0, name: "cook lunch",     deadline: new Date("2030-02-01").getTime(), priority: 5,  dependencies: [1, 2]},
+                              {id: 1, name: "buy some food",  deadline: new Date("2030-02-05").getTime(), priority: 8,  dependencies: [3]},
+                              {id: 2, name: "buy a stove",    deadline: new Date("2030-01-30").getTime(), priority: -1, dependencies: [3]},
+                              {id: 3, name: "get some money", deadline: DATE_MAX.getTime(),               priority: 0,  dependencies: []}]);
     
     const tasks = tg.all_tasks;
     expect(tasks).toHaveLength(4);
@@ -159,7 +160,7 @@ test("deadlines and priorities propagate correctly (one root)", () => {
     expect(task3.effective_deadline).toEqual(new Date("2030-01-30"));
     // the original priority and deadline don't get modified
     expect(task3.priority).toEqual(0);
-    expect(task3.deadline).toEqual("never");
+    expect(task3.deadline).toEqual(DATE_MAX);
     expect(task3.progress).toEqual("todo");
 });
 
@@ -173,10 +174,10 @@ test("deadlines and priorities propagate correctly (multiple roots)", () => {
     //                  |                |
     //                  v                v
     // "buy apples" never (0)         "buy bananas" never (0)
-    const tg = new TaskGraph([{id: 0, name: "eat breakfast",  deadline: new Date("2025-02-01"), priority: 5,  dependencies: [1]},
-                              {id: 1, name: "make breakfast", deadline: "never",                priority: 0,  dependencies: [2, 3]},
-                              {id: 2, name: "buy apples",     deadline: "never",                priority: 0,  dependencies: []},
-                              {id: 3, name: "buy bananas",    deadline: "never",                priority: 0,  dependencies: []}]);
+    const tg = new TaskGraph([{id: 0, name: "eat breakfast",  deadline: new Date("2025-02-01").getTime(), priority: 5,  dependencies: [1]},
+                              {id: 1, name: "make breakfast", deadline: DATE_MAX.getTime(),               priority: 0,  dependencies: [2, 3]},
+                              {id: 2, name: "buy apples",     deadline: DATE_MAX.getTime(),               priority: 0,  dependencies: []},
+                              {id: 3, name: "buy bananas",    deadline: DATE_MAX.getTime(),               priority: 0,  dependencies: []}]);
 
     const tasks = tg.all_tasks;
     expect(tasks).toHaveLength(4);
@@ -199,7 +200,7 @@ test("deadlines and priorities propagate correctly (multiple roots)", () => {
     expect(task1.effective_priority).toEqual(5); 
     expect(task1.effective_deadline).toEqual(new Date("2025-02-01"));
     expect(task1.priority).toEqual(0);
-    expect(task1.deadline).toEqual("never");
+    expect(task1.deadline).toEqual(DATE_MAX);
     expect(task0.progress).toEqual("blocked");
 
     // "buy apples" is needed by "make breakfast" therefore it inherits its (already inherited) higher priority and sooner deadline
@@ -209,7 +210,7 @@ test("deadlines and priorities propagate correctly (multiple roots)", () => {
     expect(task2.effective_priority).toEqual(5); 
     expect(task2.effective_deadline).toEqual(new Date("2025-02-01"));
     expect(task2.priority).toEqual(0);
-    expect(task2.deadline).toEqual("never");
+    expect(task2.deadline).toEqual(DATE_MAX);
     expect(task2.progress).toEqual("todo");
 
     // "buy bananas" is needed by "make breakfast" therefore it inherits its (already inherited) higher priority and sooner deadline
@@ -219,7 +220,7 @@ test("deadlines and priorities propagate correctly (multiple roots)", () => {
     expect(task3.effective_priority).toEqual(5); 
     expect(task3.effective_deadline).toEqual(new Date("2025-02-01"));
     expect(task3.priority).toEqual(0);
-    expect(task3.deadline).toEqual("never");
+    expect(task3.deadline).toEqual(DATE_MAX);
     expect(task3.progress).toEqual("todo");
 });
 
@@ -350,19 +351,19 @@ test("agenda lists tasks in right order", () => {
     expect(agenda1[0].name).toEqual("buy bus pass");
     expect(agenda1[1].name).toEqual("buy hammer");
 
-    const tg2 = new TaskGraph([{id: 0, name: "fix car",      dependencies: [1], progress: "todo", priority: 1,  deadline: new Date("2004-05-05")},
-                               {id: 1, name: "buy hammer",   dependencies: [],  progress: "todo", priority: 0,  deadline: "never"},
-                               {id: 2, name: "go shopping",  dependencies: [3], progress: "todo", priority: 10, deadline: new Date("2004-05-10")},
-                               {id: 3, name: "buy bus pass", dependencies: [],  progress: "todo", priority: -1, deadline: "never"}]);
+    const tg2 = new TaskGraph([{id: 0, name: "fix car",      dependencies: [1], progress: "todo", priority: 1,  deadline: new Date("2004-05-05").getTime()},
+                               {id: 1, name: "buy hammer",   dependencies: [],  progress: "todo", priority: 0,  deadline: DATE_MAX.getTime()},
+                               {id: 2, name: "go shopping",  dependencies: [3], progress: "todo", priority: 10, deadline: new Date("2004-05-10").getTime()},
+                               {id: 3, name: "buy bus pass", dependencies: [],  progress: "todo", priority: -1, deadline: DATE_MAX.getTime()}]);
     const agenda2 = tg2.agenda(new Date("2004-05-06"), one_day);
     expect(agenda2).toHaveLength(2);
     expect(agenda2[0].name).toEqual("buy hammer");
     expect(agenda2[1].name).toEqual("buy bus pass");
 
-    const tg3 = new TaskGraph([{id: 0, name: "fix car",      dependencies: [],  progress: "todo", priority: 1,  deadline: new Date("2004-05-20")},
-                               {id: 1, name: "buy hammer",   dependencies: [],  progress: "todo", priority: 0,  deadline: new Date("2004-05-21")},
-                               {id: 2, name: "go shopping",  dependencies: [],  progress: "todo", priority: 10, deadline: new Date("2004-05-22")},
-                               {id: 3, name: "buy bus pass", dependencies: [],  progress: "todo", priority: -1, deadline: new Date("2004-05-23")}]);
+    const tg3 = new TaskGraph([{id: 0, name: "fix car",      dependencies: [],  progress: "todo", priority: 1,  deadline: new Date("2004-05-20").getTime()},
+                               {id: 1, name: "buy hammer",   dependencies: [],  progress: "todo", priority: 0,  deadline: new Date("2004-05-21").getTime()},
+                               {id: 2, name: "go shopping",  dependencies: [],  progress: "todo", priority: 10, deadline: new Date("2004-05-22").getTime()},
+                               {id: 3, name: "buy bus pass", dependencies: [],  progress: "todo", priority: -1, deadline: new Date("2004-05-23").getTime()}]);
     const agenda3 = tg3.agenda(new Date("2004-05-06"), one_day);
     expect(agenda3).toHaveLength(4);
     expect(agenda3[0].name).toEqual("go shopping");
@@ -370,10 +371,10 @@ test("agenda lists tasks in right order", () => {
     expect(agenda3[2].name).toEqual("buy hammer");
     expect(agenda3[3].name).toEqual("buy bus pass");
 
-    const tg4 = new TaskGraph([{id: 0, name: "fix car",      dependencies: [],  progress: "todo", priority: 1, deadline: new Date("2004-05-20")},
-                               {id: 1, name: "buy hammer",   dependencies: [],  progress: "todo", priority: 1, deadline: "never"},
-                               {id: 2, name: "go shopping",  dependencies: [],  progress: "todo", priority: 1, deadline: new Date("2004-05-22")},
-                               {id: 3, name: "buy bus pass", dependencies: [],  progress: "todo", priority: 1, deadline: new Date("2004-05-23")}]);
+    const tg4 = new TaskGraph([{id: 0, name: "fix car",      dependencies: [],  progress: "todo", priority: 1, deadline: new Date("2004-05-20").getTime()},
+                               {id: 1, name: "buy hammer",   dependencies: [],  progress: "todo", priority: 1, deadline: DATE_MAX.getTime()},
+                               {id: 2, name: "go shopping",  dependencies: [],  progress: "todo", priority: 1, deadline: new Date("2004-05-22").getTime()},
+                               {id: 3, name: "buy bus pass", dependencies: [],  progress: "todo", priority: 1, deadline: new Date("2004-05-23").getTime()}]);
     const agenda4 = tg4.agenda(new Date("2004-05-06"), one_day);
     expect(agenda4).toHaveLength(4);
     expect(agenda4[0].name).toEqual("fix car");
@@ -425,7 +426,7 @@ test("create TaskGraph from pretty printed JSON", () => {
     {
         "id": 0,
         "name": "buy stuff",
-        "deadline": "2024-04-15T00:00:00.000Z",
+        "deadline": 1713449965775,
         "dependencies": [
             1
         ]
@@ -445,6 +446,6 @@ test("convert TaskGraph to JSON", () => {
     const tg1 = new TaskGraph([{id: 0, name: "abc"}]);
     expect(tg1.to_json()).toEqual('[{"id":0,"name":"abc"}]');
 
-    const tg2 = new TaskGraph([{id: 0, name: "abc", priority: 0, deadline: "never"}, {id: 1, name: "def", dependencies: [0]}]);
+    const tg2 = new TaskGraph([{id: 0, name: "abc", priority: 0, deadline: DATE_MAX.getTime()}, {id: 1, name: "def", dependencies: [0]}]);
     expect(tg2.to_json()).toEqual('[{"id":0,"name":"abc"},{"id":1,"name":"def","dependencies":[0]}]');
 });
