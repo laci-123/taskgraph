@@ -1,7 +1,7 @@
 import {MaybeDate, compare_dates, get_time} from "./maybedate";
 
 
-export const progress_type_values = ["blocked", "todo", "doing", "done", "failed"] as const;
+export const progress_type_values = ["blocked", "todo", "started", "done", "failed"] as const;
 
 export type Progress  = (typeof progress_type_values)[number];
 
@@ -110,7 +110,7 @@ export class Task {
 
     public has_unfinished_dependency(): boolean {
         for(const dep_task of this.depends_on) {
-            if(dep_task.progress === "blocked" || dep_task.progress === "todo" || dep_task.progress === "doing") {
+            if(dep_task.progress === "blocked" || dep_task.progress === "todo" || dep_task.progress === "started") {
                 return true;
             }
         }

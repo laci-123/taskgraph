@@ -31,7 +31,7 @@ test("TaskGraph with one task (without missing fields) constructs properly", () 
                                priority: -1,
                                deadline: new Date("2025-06-07"),
                                birthline: "never",
-                               progress: "doing",
+                               progress: "started",
                                dependencies: []}]);
     const tasks = tg.all_tasks;
     expect(tasks).toHaveLength(1);
@@ -44,7 +44,7 @@ test("TaskGraph with one task (without missing fields) constructs properly", () 
     expect(task.deadline).toEqual(new Date("2025-06-07"));
     expect(task.effective_deadline).toEqual(new Date("2025-06-07"));
     expect(task.birthline).toEqual("never");
-    expect(task.progress).toEqual("doing");
+    expect(task.progress).toEqual("started");
     expect(task.depends_on).toHaveLength(0);
     expect(task.needed_by).toHaveLength(0);
 });

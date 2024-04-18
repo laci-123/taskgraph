@@ -55,7 +55,7 @@ export class TaskGraph {
 
         while(S.size() > 0) {
             const n = S.poll()!; // S.poll() always returns an element because we just checked that S.size() > 0
-            if(n.progress === "todo" || n.progress === "doing") {
+            if(n.progress === "todo" || n.progress === "started") {
                 L.push(n);
             }
             for(const m of n.needed_by) {
