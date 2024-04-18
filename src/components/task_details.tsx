@@ -42,7 +42,7 @@ export default function TaskDetails(props: TaskDetailsProps): ReactElement {
             </div>
             <div className="task-vertical-group">
                 <TaskDeadline deadline={props.editor_state.deadline ? new Date(props.editor_state.deadline) : DATE_MAX}
-        handleChange={(e) => {console.log("Selected date: ", e.toISOString()); props.handleChange({...props.editor_state, deadline: e.getTime()});}} />
+                              handleChange={(e) => props.handleChange({...props.editor_state, deadline: e.getTime()})} />
                 <TaskEffectiveDeadline task={props.task} />
             </div>
             <TaskPriority priority={props.editor_state.priority || 0}

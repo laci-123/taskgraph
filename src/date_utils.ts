@@ -31,3 +31,8 @@ export function date_to_relative_string(date: Date, now: Date, min_representatio
 export function days_between(d1: Date, d2: Date): number {
     return (d1.getTime() - d2.getTime()) / (24 * 60 * 60 * 1000);
 }
+
+// d1 === d2 and d1 == d2 do NOT work because they check reference equality.
+export function dates_equal(d1: Date, d2: Date): boolean {
+    return d1.getTime() === d2.getTime();
+}
