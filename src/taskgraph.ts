@@ -102,7 +102,9 @@ export class TaskGraph {
                                   rt.priority, new Date(rt.deadline ?? DATE_MAX),
                                   rt.priority, new Date(rt.deadline ?? DATE_MAX),
                                   new Date(rt.birthline ?? DATE_MIN),
-                                  rt.progress === "blocked" ? "todo" : rt.progress); // a task cannot be blocked on its own, it can only be marked so based on its dependencies
+                                  rt.progress === "blocked" ? "todo" : rt.progress, // a task cannot be blocked on its own, it can only be marked so based on its dependencies
+                                  rt.repeat,
+                                  rt.next);
             this.tasks.set(rt.id, task);
             if(!rt.dependencies || rt.dependencies.length === 0) {
                 this.roots.add(task);

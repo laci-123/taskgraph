@@ -18,10 +18,12 @@ export interface RawTask {
     birthline?: number,
     progress?: Progress,
     dependencies?: number[],
+    repeat?: number | null,
+    next?: number | null,
 }
 
 export function copy_RawTask_without_defaults(rt: RawTask): RawTask {
-    const {id, name, description, priority, deadline, birthline, progress, dependencies} = rt;
+    const {id, name, description, priority, deadline, birthline, progress, dependencies, repeat, next} = rt;
     const new_rt = {id, name} as RawTask;
     if(description !== "") {
         new_rt.description = description;
@@ -40,6 +42,12 @@ export function copy_RawTask_without_defaults(rt: RawTask): RawTask {
     }
     if(dependencies && dependencies.length > 0) {
         new_rt.dependencies = dependencies;
+    }
+    if(repeat) {
+        new_rt.repeat = repeat;
+    }
+    if(next) {
+        new_rt.next = next;
     }
 
     return new_rt;
@@ -80,6 +88,8 @@ export class Task {
         public effective_deadline: Date = deadline,
         public birthline: Date = new Date(DATE_MIN),
         public progress: Progress = "todo",
+        public repeat: number | null = null,
+        public next: number | null = null,
         public depends_on: Task[] = [],
         public needed_by: Task[] = [])
     {}
@@ -103,6 +113,12 @@ export class Task {
         }
         if(this.depends_on.length > 0) {
             rt.dependencies = this.depends_on.map((t) => t.id);
+        }
+        if(this.repeat) {
+            rt.repeat = this.repeat;
+        }
+        if(this.next) {
+            rt.next = this.next;
         }
 
         return rt;
