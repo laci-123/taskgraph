@@ -1,5 +1,5 @@
 import { DATE_MAX, DATE_MIN } from "./date_utils";
-import {Task, RawTask, compare_tasks, Progress, asRawTaskArray, copy_RawTask_without_defaults} from "./task";
+import {Task, RawTask, compare_tasks, Progress, asRawTaskArray} from "./task";
 import PriorityQueue from "priority-queue-typescript";
 
 
@@ -82,7 +82,7 @@ export class TaskGraph {
     }
 
     public to_json(pretty_print?: "pretty-print"): string {
-        const raw_tasks = this.all_tasks.map((t) => copy_RawTask_without_defaults(t.to_raw_task()));
+        const raw_tasks = this.all_tasks.map((t) => t.to_raw_task());
         if(pretty_print) {
             return JSON.stringify(raw_tasks, null, 4);
         }

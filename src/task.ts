@@ -22,37 +22,6 @@ export interface RawTask {
     next?: number | null,
 }
 
-export function copy_RawTask_without_defaults(rt: RawTask): RawTask {
-    const {id, name, description, priority, deadline, birthline, progress, dependencies, repeat, next} = rt;
-    const new_rt = {id, name} as RawTask;
-    if(description !== "") {
-        new_rt.description = description;
-    }
-    if(priority !== 0) {
-        new_rt.priority = priority;
-    }
-    if(deadline && deadline < DATE_MAX.getTime()) {
-        new_rt.deadline = deadline;
-    }
-    if(birthline && birthline > DATE_MIN.getTime()) {
-        new_rt.birthline = birthline;
-    }
-    if(progress !== "blocked" && progress !== "todo") {
-        new_rt.progress = progress;
-    }
-    if(dependencies && dependencies.length > 0) {
-        new_rt.dependencies = dependencies;
-    }
-    if(repeat) {
-        new_rt.repeat = repeat;
-    }
-    if(next) {
-        new_rt.next = next;
-    }
-
-    return new_rt;
-}
-
 export function asRawTask(x: any): RawTask {
     if("id" in x && typeof(x.id) === "number" && "name" in x && typeof(x.name) == "string") {
         if("deadline" in x && typeof(x.deadline) === "string") {
@@ -102,13 +71,13 @@ export class Task {
         if(this.priority !== 0) {
             rt.priority = this.priority;
         }
-        if(this.deadline <= DATE_MAX) {
+        if(this.deadline < DATE_MAX) {
             rt.deadline = this.deadline.getTime();
         }
-        if(this.birthline >= DATE_MIN) {
+        if(this.birthline > DATE_MIN) {
             rt.birthline = this.birthline.getTime();
         }
-        if(this.progress !== "todo") {
+        if(this.progress !== "todo" && this.progress !== "blocked") {
             rt.progress = this.progress;
         }
         if(this.depends_on.length > 0) {
