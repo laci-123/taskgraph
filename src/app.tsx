@@ -17,12 +17,13 @@ const sr: StatusReporter = {
 
 export default function App(): ReactElement {
     const [state, setState] = useState<AppState>(init_appstate(sr, localStorage));
+    const [darkmode, setDarkmode] = useState<boolean>((localStorage.getItem("dark-mode") ?? false) === "true");
 
     useEffect(() => {
         localStorage.setItem("tasks", state.tg.to_json());
     }, [state.tg]);
     useEffect(() => {
-        if(state.dark_mode) {
+        if(darkmode) {
             document.body.classList.add("dark-mode");
             localStorage.setItem("dark-mode", "true");
         }
@@ -30,7 +31,7 @@ export default function App(): ReactElement {
             document.body.classList.remove("dark-mode");
             localStorage.setItem("dark-mode", "false");
         }
-    }, [state.dark_mode]);
+    }, [darkmode]);
 
     const homepage = <HomePage tg={state.tg}
                                which_task_list={state.which_task_list}
@@ -41,7 +42,7 @@ export default function App(): ReactElement {
                                        handleSave={(rt) => setState(update_appstate(sr, state, rt))} />;
     const settingspage = <SettingsPage tg={state.tg}
                                        is_dark={state.dark_mode}
-                                       handleChange={(is_dark) => setState({...state, dark_mode: is_dark})}
+                                       handleChange={(is_dark) => setDarkmode(is_dark)}
                                        handleTaskImport={(tasks_json) => setState(import_tasks(sr, state, tasks_json))} />
 
     return (
