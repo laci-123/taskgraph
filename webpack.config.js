@@ -2,7 +2,7 @@ const path = require('path');
 const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-    entry: './ts/index.tsx',
+    entry: './gui/index.tsx',
     devtool: false,
     module: {
         rules: [
@@ -22,7 +22,7 @@ module.exports = {
             patterns: [
                 "index.html",
                 "manifest.json",
-                "sw.js",
+                "service-worker.js",
                 "css/*",
                 {
                     from: "node_modules/react-day-picker/dist/style.css",
@@ -32,6 +32,9 @@ module.exports = {
             ],
         }),
     ],
+    experiments: {
+        asyncWebAssembly: true
+    },
     resolve: {
         extensions: ['.tsx', '.ts'],
     },

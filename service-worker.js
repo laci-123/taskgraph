@@ -4,7 +4,7 @@ const updateCache = async (resources) => {
         caches.delete(key);
     }
     
-    const cache = await caches.open("v3");
+    const cache = await caches.open("v4");
     await cache.addAll(resources);
 };
 
