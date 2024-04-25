@@ -15,9 +15,11 @@ else {
     console.log("Service Workers are not supported");
 }
 
+wasm.init();
+
 wasm.greet();
 
 const root_element = document.getElementById("root")!;
 const root = createRoot(root_element);
-const apples = wasm.some_string(3, 5);
+const apples = wasm.some_string(-3, 5);
 root.render(<div>{apples}</div>);
