@@ -4,7 +4,7 @@
   "description": "Todo-app with dependencies among tasks",
   "private": true,
   "scripts": {
-    "test": "echo 'There are no tests.'",
+    "test": "./taskgraph/local_test_runner.sh || cargo test --manifest-path ./taskgraph/Cargo.toml",
     "build-wasm": "wasm-pack build ./taskgraph/",
     "build": "wasm-pack build ./taskgraph/ && webpack"
   },
