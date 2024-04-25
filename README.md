@@ -18,6 +18,6 @@ Try it [here](https://laci-123.github.io/taskgraph/).
   * Reminders for upcoming tasks
   * Graphical representation of the relations between tasks
 
-![screenshot](./readme/screenshot_1.png)
-![screenshot](./readme/screenshot_2.png)
-![screenshot](./readme/screenshot_3.png)
+![screenshot](./doc/screenshot_1.png)
+![screenshot](./doc/screenshot_2.png)
+![screenshot](./doc/screenshot_3.png)
