@@ -25,5 +25,6 @@ pub fn some_string(x: i32, y: i32) -> String {
 
 
 mod timepoint;
+mod task;
 mod tg;
 mod utils;

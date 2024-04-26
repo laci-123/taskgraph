@@ -1,13 +1,35 @@
 use chrono::Duration;
 use std::ops::{Add, Sub};
+use serde::{Serialize, Deserialize};
 
 
+pub type SecondsSinceEpoch = i64;
+
+#[derive(Serialize, Deserialize)]
+#[serde(untagged)]
+#[derive(PartialEq, Eq, Debug)]
 pub enum TimePoint {
     BeforeEverything,
     AfterEverything,
-    Normal{
-        seconds_since_epoch: i64,
-    },
+    Normal(SecondsSinceEpoch),
+}
+
+impl TimePoint {
+    pub fn before_everything() -> Self {
+        Self::BeforeEverything
+    }
+
+    pub fn after_everything() -> Self {
+        Self::AfterEverything
+    }
+    
+    pub fn is_before_everything(&self) -> bool {
+        matches!(self, Self::BeforeEverything)
+    }
+
+    pub fn is_after_everything(&self) -> bool {
+        matches!(self, Self::AfterEverything)
+    }
 }
 
 impl Add<Duration> for TimePoint {
@@ -19,11 +41,7 @@ impl Add<Duration> for TimePoint {
         match self {
             BeforeEverything => BeforeEverything,
             AfterEverything  => AfterEverything,
-            Normal { seconds_since_epoch } => {
-                Normal {
-                    seconds_since_epoch: seconds_since_epoch + rhs.num_seconds()
-                }
-            },
+            Normal(sse)      => Normal(sse + rhs.num_seconds()),
         }
     }
 }
@@ -37,11 +55,7 @@ impl Sub<Duration> for TimePoint {
         match self {
             BeforeEverything => BeforeEverything,
             AfterEverything  => AfterEverything,
-            Normal { seconds_since_epoch } => {
-                Normal {
-                    seconds_since_epoch: seconds_since_epoch - rhs.num_seconds()
-                }
-            },
+            Normal(sse)      => Normal(sse - rhs.num_seconds()),
         }
     }
 }
@@ -63,10 +77,10 @@ impl Sub<TimePoint> for TimePoint {
                 AfterEverything  => Duration::zero(),
                 Normal { .. }    => Duration::max_value(),
             },
-            Normal { seconds_since_epoch: lsse } => match rhs {
+            Normal(lsse) => match rhs {
                 BeforeEverything => Duration::max_value(),
                 AfterEverything  => Duration::min_value(),
-                Normal { seconds_since_epoch: rsse } => Duration::seconds(lsse - rsse)
+                Normal(rsse)     => Duration::seconds(lsse - rsse)
             },
         }
     }
