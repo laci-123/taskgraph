@@ -8,3 +8,9 @@ pub fn set_panic_hook() {
     #[cfg(feature = "console_error_panic_hook")]
     console_error_panic_hook::set_once();
 }
+
+#[cfg(test)]
+pub fn assert_eq_json(json_str: &str, correct_json: serde_json::Value) {
+    let json: serde_json::Value = serde_json::from_str(json_str).unwrap();
+    assert_eq!(json, correct_json);
+}

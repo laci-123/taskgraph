@@ -1,12 +1,7 @@
 use super::*;
 use pretty_assertions::assert_eq;
+use crate::utils::assert_eq_json;
 use serde_json::json;
-
-
-fn assert_eq_json(json_str: &str, correct_json: serde_json::Value) {
-    let json: serde_json::Value = serde_json::from_str(json_str).unwrap();
-    assert_eq!(json, correct_json);
-}
 
 
 #[test]

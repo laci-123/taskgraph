@@ -106,6 +106,15 @@ pub struct Task {
     recurrence: Option<Recurrence>,
 }
 
+impl Task {
+    pub fn new(name: &str) -> Self {
+        Self {
+            name: name.to_string(),
+            ..Default::default()
+        }
+    }
+}
+
 
 #[cfg(test)]
 mod tests;
