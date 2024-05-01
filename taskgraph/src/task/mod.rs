@@ -65,45 +65,45 @@ fn deserialize_duration<'de, D: Deserializer<'de>>(d: D) -> Result<Duration, D::
 #[derive(Serialize, Deserialize)]
 #[derive(SmartDefault)]
 pub struct Task {
-    name: String,
+    pub name: String,
 
     #[serde(default, skip_serializing_if = "IsDefault::is_default")]
-    description: String,
+    pub description: String,
 
     #[serde(default, skip_serializing_if = "IsDefault::is_default")]
-    priority: i8,
+    pub priority: i8,
 
     #[serde(default, skip_serializing)]
-    computed_priority: Option<i8>,
+    pub computed_priority: Option<i8>,
 
     #[serde(default = "TimePoint::after_everything", skip_serializing_if = "TimePoint::is_after_everything")]
     #[default(TimePoint::AfterEverything)]
-    deadline: TimePoint,
+    pub deadline: TimePoint,
 
     #[serde(default, skip_serializing)]
-    computed_deadline: Option<TimePoint>,
+    pub computed_deadline: Option<TimePoint>,
 
     #[serde(default = "TimePoint::before_everything", skip_serializing_if = "TimePoint::is_before_everything")]
     #[default(TimePoint::BeforeEverything)]
-    birthline: TimePoint,
+    pub birthline: TimePoint,
 
     #[serde(default, skip_serializing_if = "IsDefault::is_default")]
-    progress: Progress,
+    pub progress: Progress,
 
     #[serde(default, skip_serializing)]
-    computed_progress: Option<ComputedProgress>,
+    pub computed_progress: Option<ComputedProgress>,
 
     #[serde(default, skip_serializing_if = "IsDefault::is_default")]
-    group_like: bool,
+    pub group_like: bool,
 
     #[serde(default, skip_serializing_if = "IsDefault::is_default")]
-    auto_fail: bool,
+    pub auto_fail: bool,
 
     #[serde(default, skip_serializing_if = "IsDefault::is_default")]
-    finished: Option<SecondsSinceEpoch>,
+    pub finished: Option<SecondsSinceEpoch>,
 
     #[serde(default, skip_serializing_if = "IsDefault::is_default")]
-    recurrence: Option<Recurrence>,
+    pub recurrence: Option<Recurrence>,
 }
 
 impl Task {
