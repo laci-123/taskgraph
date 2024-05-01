@@ -26,11 +26,11 @@ pub struct TaskGraph {
 }
 
 impl TaskGraph {
-    pub fn add_node(&mut self, id: TaskId, task: Task) {
+    pub fn add_task(&mut self, id: TaskId, task: Task) {
         self.nodes.insert(id, Node{ task, ..Default::default() });
     }
 
-    pub fn add_edge(&mut self, from: TaskId, to: TaskId) -> Result<(), TgError> {
+    pub fn add_dependency(&mut self, from: TaskId, to: TaskId) -> Result<(), TgError> {
         if !self.nodes.contains_key(&from) {
             return Err(TgError::NonExistentId(from));
         }
@@ -60,18 +60,37 @@ impl TaskGraph {
             .ok_or(TgError::NonExistentId(id))
     }
 
-    pub fn children_of(&self, id: TaskId) -> Result<&HashSet<TaskId>, TgError> {
+    pub fn dependencies_of(&self, id: TaskId) -> Result<&HashSet<TaskId>, TgError> {
         self.nodes
             .get(&id)
             .map(|node| &node.children)
             .ok_or(TgError::NonExistentId(id))
     }
 
-    pub fn parents_of(&self, id: TaskId) -> Result<&HashSet<TaskId>, TgError> {
+    pub fn users_of(&self, id: TaskId) -> Result<&HashSet<TaskId>, TgError> {
         self.nodes
             .get(&id)
             .map(|node| &node.parents)
             .ok_or(TgError::NonExistentId(id))
+    }
+
+    pub fn calculate(&mut self) -> Result<(), TgError> {
+        let roots = self.nodes
+                        .iter()
+                        .filter(|(_id, node)| node.parents.len() == 0)
+                        .map(|(id, _node)| *id)
+                        .collect::<Vec<TaskId>>();
+
+        for root in roots {
+            self.dfs(root)?;
+        }
+
+        Ok(())
+    }
+
+    fn dfs(&mut self, root: TaskId) -> Result<(), TgError> {
+
+        Ok(())
     }
 
     fn color_of(&self, id: TaskId) -> Result<Color, TgError> {
