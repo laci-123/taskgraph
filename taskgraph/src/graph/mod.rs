@@ -78,9 +78,8 @@ impl<T> Graph<T> {
     }
     
     pub fn get(&self, index: usize) -> Result<&T, GraphError> {
-        // SAFE: `get`, `get_mut`, `get_children` and `get_parents` are the only methods that
-        //       can release references to nodes to public code.
-        //       They take `&self` and `&mut self` properly therefore the borrow checker can
+        // SAFE: All public methods that can release references to nodes into safe code
+        //       take `&self` and `&mut self` properly, therefore the borrow checker can
         //       enforce that there are only one mutable reference or any number of immutable
         //       references to any given node. 
         unsafe {
@@ -89,9 +88,8 @@ impl<T> Graph<T> {
     }
 
     pub fn get_mut(&mut self, index: usize) -> Result<&mut T, GraphError> {
-        // SAFE: `get`, `get_mut`, `get_children` and `get_parents` are the only methods that
-        //       can release references to nodes to public code.
-        //       They take `&self` and `&mut self` properly therefore the borrow checker can
+        // SAFE: All public methods that can release references to nodes into safe code
+        //       take `&self` and `&mut self` properly, therefore the borrow checker can
         //       enforce that there are only one mutable reference or any number of immutable
         //       references to any given node. 
         unsafe {
@@ -100,9 +98,8 @@ impl<T> Graph<T> {
     }
 
     pub fn get_children(&self, index: usize) -> Result<hash_set::Iter<usize>, GraphError> {
-        // SAFE: `get`, `get_mut`, `get_children` and `get_parents` are the only methods that
-        //       can release references to nodes to public code.
-        //       They take `&self` and `&mut self` properly therefore the borrow checker can
+        // SAFE: All public methods that can release references to nodes into safe code
+        //       take `&self` and `&mut self` properly, therefore the borrow checker can
         //       enforce that there are only one mutable reference or any number of immutable
         //       references to any given node. 
         unsafe {
@@ -111,9 +108,8 @@ impl<T> Graph<T> {
     }
 
     pub fn get_parents(&self, index: usize) -> Result<hash_set::Iter<usize>, GraphError> {
-        // SAFE: `get`, `get_mut`, `get_children` and `get_parents` are the only methods that
-        //       can release references to nodes to public code.
-        //       They take `&self` and `&mut self` properly therefore the borrow checker can
+        // SAFE: All public methods that can release references to nodes into safe code
+        //       take `&self` and `&mut self` properly, therefore the borrow checker can
         //       enforce that there are only one mutable reference or any number of immutable
         //       references to any given node. 
         unsafe {
