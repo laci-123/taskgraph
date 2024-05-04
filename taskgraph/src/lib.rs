@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -27,5 +29,6 @@ pub fn some_string(x: i32, y: i32) -> String {
 mod timepoint;
 mod task;
 mod mutcell;
+mod graph;
 mod tg;
 mod utils;
