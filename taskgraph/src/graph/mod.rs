@@ -1,4 +1,4 @@
-use std::{cell::UnsafeCell, collections::{hash_set, HashMap, HashSet}, error::Error, hash::Hash};
+use std::{cell::UnsafeCell, collections::{hash_set, HashMap, HashSet}, error::Error};
 
 
 #[derive(Default, PartialEq, Eq)]
@@ -11,21 +11,21 @@ enum Color {
 }
 
 #[derive(Default)]
-struct Node<T, Ix = usize> {
+struct Node<T> {
     value: T,
-    parents: HashSet<Ix>,
-    children: HashSet<Ix>,
+    parents: HashSet<usize>,
+    children: HashSet<usize>,
     color: Color,
 }
 
 #[derive(Default)]
-pub struct Graph<T, Ix = usize> {
-    nodes: HashMap<Ix, UnsafeCell<Node<T, Ix>>>,
+pub struct Graph<T> {
+    nodes: HashMap<usize, UnsafeCell<Node<T>>>,
 }
 
 const MAX_CALL_DEPTH: usize = 1000;
 
-impl<T, Ix: Eq + Hash + Copy> Graph<T, Ix> {
+impl<T> Graph<T> {
     pub fn add_node(&mut self, value: T) {
         let index = self.smallest_available_index();
         self.nodes.insert(index, UnsafeCell::new(Node {
@@ -36,10 +36,10 @@ impl<T, Ix: Eq + Hash + Copy> Graph<T, Ix> {
         }));
     }
 
-    fn smallest_available_index(&self) -> Ix {
+    fn smallest_available_index(&self) -> usize {
         let length = self.nodes.len();
         for i in 0 .. length {
-            if !self.nodes.contains_key(i) {
+            if !self.nodes.contains_key(&i) {
                 return i;
             }
         }
@@ -47,7 +47,7 @@ impl<T, Ix: Eq + Hash + Copy> Graph<T, Ix> {
         length
     }
 
-    pub fn add_edge(&mut self, from: Ix, to: Ix) -> Result<(), GraphError<Ix>> {
+    pub fn add_edge(&mut self, from: usize, to: usize) -> Result<(), GraphError> {
         if from == to {
             return Err(GraphError::Cycle{ixs: vec![from], finished: true});
         }
@@ -69,7 +69,7 @@ impl<T, Ix: Eq + Hash + Copy> Graph<T, Ix> {
         Ok(())
     }
 
-    pub fn remove(&mut self, index: Ix) {
+    pub fn remove(&mut self, index: usize) {
         self.nodes.remove(&index);
         for node in self.nodes.values_mut() {
             node.get_mut().children.remove(&index);
@@ -77,7 +77,7 @@ impl<T, Ix: Eq + Hash + Copy> Graph<T, Ix> {
         }
     }
     
-    pub fn get(&self, index: Ix) -> Result<&T, GraphError<Ix>> {
+    pub fn get(&self, index: usize) -> Result<&T, GraphError> {
         // SAFE: `get`, `get_mut`, `get_children` and `get_parents` are the only methods that
         //       can release references to nodes to public code.
         //       They take `&self` and `&mut self` properly therefore the borrow checker can
@@ -88,7 +88,7 @@ impl<T, Ix: Eq + Hash + Copy> Graph<T, Ix> {
         }
     }
 
-    pub fn get_mut(&mut self, index: Ix) -> Result<&mut T, GraphError<Ix>> {
+    pub fn get_mut(&mut self, index: usize) -> Result<&mut T, GraphError> {
         // SAFE: `get`, `get_mut`, `get_children` and `get_parents` are the only methods that
         //       can release references to nodes to public code.
         //       They take `&self` and `&mut self` properly therefore the borrow checker can
@@ -99,7 +99,7 @@ impl<T, Ix: Eq + Hash + Copy> Graph<T, Ix> {
         }
     }
 
-    pub fn get_children(&self, index: Ix) -> Result<hash_set::Iter<Ix>, GraphError<Ix>> {
+    pub fn get_children(&self, index: usize) -> Result<hash_set::Iter<usize>, GraphError> {
         // SAFE: `get`, `get_mut`, `get_children` and `get_parents` are the only methods that
         //       can release references to nodes to public code.
         //       They take `&self` and `&mut self` properly therefore the borrow checker can
@@ -110,7 +110,7 @@ impl<T, Ix: Eq + Hash + Copy> Graph<T, Ix> {
         }
     }
 
-    pub fn get_parents(&self, index: Ix) -> Result<hash_set::Iter<Ix>, GraphError<Ix>> {
+    pub fn get_parents(&self, index: usize) -> Result<hash_set::Iter<usize>, GraphError> {
         // SAFE: `get`, `get_mut`, `get_children` and `get_parents` are the only methods that
         //       can release references to nodes to public code.
         //       They take `&self` and `&mut self` properly therefore the borrow checker can
@@ -123,18 +123,18 @@ impl<T, Ix: Eq + Hash + Copy> Graph<T, Ix> {
 
     // SAFETY: Caller should ensure that there are no mutable reference to this particular node
     //         (multiple immutable references are OK).
-    unsafe fn get_node(&self, index: Ix) -> Result<&Node<T, Ix>, GraphError<Ix>> {
+    unsafe fn get_node(&self, index: usize) -> Result<&Node<T>, GraphError> {
         let cell = self.nodes.get(&index).ok_or(GraphError::NonExistentNode(index))?;
         Ok(&*cell.get())
     }
 
     // SAFETY: Caller should ensure that this is the only mutable reference to this particular node.
-    unsafe fn get_node_mut(&self, index: Ix) -> Result<&mut Node<T, Ix>, GraphError<Ix>> {
+    unsafe fn get_node_mut(&self, index: usize) -> Result<&mut Node<T>, GraphError> {
         let cell = self.nodes.get(&index).ok_or(GraphError::NonExistentNode(index))?;
         Ok(&mut *cell.get())
     }
 
-    pub fn depth_first_traverse<R>(&mut self, pre_action: impl PreAction<T>, post_action: impl PostAction<T, R>) -> Result<(), GraphError<Ix>> {
+    pub fn depth_first_traverse<R>(&mut self, pre_action: impl PreAction<T>, post_action: impl PostAction<T, R>) -> Result<(), GraphError> {
         let roots = self.nodes
                         .iter()
                         .filter(|(_index, node)| {
@@ -165,7 +165,7 @@ impl<T, Ix: Eq + Hash + Copy> Graph<T, Ix> {
         Ok(())
     }
 
-    fn dfs<R>(&self, root_ix: Ix, pre_action: &impl PreAction<T>, post_action: &impl PostAction<T, R>, call_depth: usize) -> Result<Option<R>, GraphError<Ix>> {
+    fn dfs<R>(&self, root_ix: usize, pre_action: &impl PreAction<T>, post_action: &impl PostAction<T, R>, call_depth: usize) -> Result<Option<R>, GraphError> {
         // `dfs` is only ever called from `depth_first_traverse` or from itself recursively
         // which both guarantee that when `dfs` is called there are no references alive to any node.
         
@@ -262,12 +262,12 @@ impl<T, R, F: Fn(&mut T, Vec<R>) -> Result<R, Box<dyn Error>>> PostAction<T, R> 
 
 
 #[derive(Debug)]
-pub enum GraphError<Ix = usize> {
+pub enum GraphError {
     Cycle{
-        ixs: Vec<Ix>,
+        ixs: Vec<usize>,
         finished: bool
     },
-    NonExistentNode(Ix),
+    NonExistentNode(usize),
     StackOverflow,
     Other(Box<dyn Error>),
 }
