@@ -26,7 +26,7 @@ pub struct Graph<T> {
 const MAX_CALL_DEPTH: usize = 1000;
 
 impl<T> Graph<T> {
-    pub fn add_node(&mut self, value: T) {
+    pub fn add_node(&mut self, value: T) -> usize {
         let index = self.smallest_available_index();
         self.nodes.insert(index, UnsafeCell::new(Node {
             value,
@@ -34,6 +34,7 @@ impl<T> Graph<T> {
             children: HashSet::default(),
             color: Color::default()
         }));
+        index
     }
 
     fn smallest_available_index(&self) -> usize {
@@ -75,6 +76,10 @@ impl<T> Graph<T> {
             node.get_mut().children.remove(&index);
             node.get_mut().parents.remove(&index);
         }
+    }
+
+    pub fn len(&self) -> usize {
+        self.nodes.len()
     }
     
     pub fn get(&self, index: usize) -> Result<&T, GraphError> {
@@ -188,12 +193,14 @@ impl<T> Graph<T> {
             let mut children = Vec::new();
             for child_ix in child_ixs.iter() {
                 if *child_ix == root_ix {
-                    // This ensures that no reference in `children` can be
-                    // of the same node as `root_mut`. 
                     return Err(GraphError::Cycle{ixs: vec![*child_ix, root_ix], finished: true});
                 }
-                // TODO: filter out duplicate children
-                children.push(self.get(*child_ix)?);
+                // SAFE: The previous check ensures that no reference in `children` can be
+                // of the same node as `root_mut`. And because `children` is a HashSet
+                // all of them must reference diffent nodes.
+                unsafe {
+                    children.push(&mut self.get_node_mut(*child_ix)?.value);
+                }
             }
             pre_action.call(&mut root_mut.value, children).map_err(|error| GraphError::Other(error))?;
         }
@@ -236,11 +243,11 @@ impl<T> Graph<T> {
 
 
 pub trait PreAction<T> {
-    fn call(&self, value: &mut T, children: Vec<&T>) -> Result<(), Box<dyn Error>>;
+    fn call(&self, value: &mut T, children: Vec<&mut T>) -> Result<(), Box<dyn Error>>;
 }
 
-impl<T, F: Fn(&mut T, Vec<&T>) -> Result<(), Box<dyn Error>>> PreAction<T> for F {
-    fn call(&self, value: &mut T, children: Vec<&T>) -> Result<(), Box<dyn Error>> {
+impl<T, F: Fn(&mut T, Vec<&mut T>) -> Result<(), Box<dyn Error>>> PreAction<T> for F {
+    fn call(&self, value: &mut T, children: Vec<&mut T>) -> Result<(), Box<dyn Error>> {
         self(value, children)
     }
 }
@@ -267,3 +274,7 @@ pub enum GraphError {
     StackOverflow,
     Other(Box<dyn Error>),
 }
+
+
+#[cfg(test)]
+mod tests;
