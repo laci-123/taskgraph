@@ -99,3 +99,232 @@ fn edges() {
     assert_eq!(iter_to_set(graph.get_parents(n1)), HashSet::from([0]));
     assert_eq!(iter_to_set(graph.get_parents(n2)), HashSet::from([0]));
 }
+
+#[test]
+fn edges_between_nonexistent_nodes() {
+    let mut graph = Graph::default();
+    let n0 = graph.add_node(10);
+    let n1 = graph.add_node(20);
+    graph.add_node(30);
+    assert!(matches!(graph.add_edge(n0, 100), Err(GraphError::NonExistentNode(100))));
+    assert!(matches!(graph.add_edge(100, n1), Err(GraphError::NonExistentNode(100))));
+    assert!(matches!(graph.add_edge(100, 200), Err(GraphError::NonExistentNode(100))));
+}
+
+#[test]
+fn edges_with_cycles() {
+    let mut graph = Graph::default();
+    let n0 = graph.add_node(10);
+    let n1 = graph.add_node(20);
+    let n2 = graph.add_node(30);
+    match graph.add_edge(n0, n0) {
+        Err(GraphError::Cycle { ixs, finished }) => {
+            assert_eq!(ixs, vec![0]);
+            assert_eq!(finished, true);
+        },
+        _ => panic!("graph.add_edge(n0, n0) shoud have faild"),
+    }
+    graph.add_edge(n0, n1).unwrap();
+    match graph.add_edge(n1, n0) {
+        Err(GraphError::Cycle { ixs, finished }) => {
+            assert_eq!(ixs, vec![1, 0]);
+            assert_eq!(finished, true);
+        },
+        _ => panic!("graph.add_edge(n1, n0) shoud have faild"),
+    }
+    graph.add_edge(n1, n2).unwrap();
+    graph.add_edge(n2, n0).unwrap(); // No error: `add_edge` can only detect trival cycles.
+}
+
+#[test]
+fn dfs_empty() {
+    let mut graph: Graph<i32> = Graph::default();
+    graph.depth_first_traverse(|_value: &mut i32, _children: Vec<&mut i32>| Ok(()), |_value: &mut i32, _children: Vec<i32>| Ok(3)).unwrap();
+    // nothing shoud happen
+}
+
+#[test]
+fn dfs_one_node() {
+    let mut graph = Graph::default();
+    graph.add_node(3);
+
+    graph.depth_first_traverse(|value: &mut i32, children: Vec<&mut i32>| {
+        // preorder
+        assert_eq!(*value, 3); 
+        assert_eq!(children.len(), 0); 
+        *value = 5;
+        Ok(())
+    }, 
+    |value: &mut i32, children: Vec<i32>| {
+        // postorder
+        assert_eq!(*value, 5);
+        assert_eq!(children.len(), 0);
+        *value = 11;
+        Ok(100)
+    }).unwrap();
+
+    assert_eq!(*graph.get(0).unwrap(), 11);
+}
+
+#[test]
+fn dfs_simple() {
+    let mut graph = Graph::default();
+    let n0 = graph.add_node(3);
+    let n1 = graph.add_node(10);
+    let n2 = graph.add_node(-2);
+    let n3 = graph.add_node(7);
+    let n4 = graph.add_node(4);
+    let n5 = graph.add_node(11);
+    let n6 = graph.add_node(0);
+    graph.add_edge(n0, n1).unwrap();
+    graph.add_edge(n0, n2).unwrap();
+    graph.add_edge(n1, n3).unwrap();
+    graph.add_edge(n1, n4).unwrap();
+    graph.add_edge(n2, n5).unwrap();
+    graph.add_edge(n2, n6).unwrap();
+    //            n0(3)
+    //          /       \
+    //    n1(10)         n2(-2)
+    //     /  \           /  \
+    // n3(7)  n4(4)  n5(11)  n6(0)
+
+    let mut inner_nodes = HashSet::new();
+    let mut leaves = HashSet::new();
+
+    graph.depth_first_traverse(|value: &mut i32, children: Vec<&mut i32>| {
+        // preorder
+        if children.len() == 0 {
+            leaves.insert(*value);
+        }
+        else {
+            inner_nodes.insert(*value);
+        }
+        Ok(())
+    }, 
+    |value: &mut i32, children: Vec<i32>| {
+        // postorder
+        // Move maximum value into the root.
+        if let Some(max_child) = children.iter().max() {
+            if *max_child > *value {
+                *value = *max_child;
+            }
+        }
+        Ok(*value)
+    }).unwrap();
+
+    assert_eq!(inner_nodes, HashSet::from([3, 10, -2]));
+    assert_eq!(leaves,      HashSet::from([7, 4, 11, 0]));
+    assert_eq!(*graph.get(0).unwrap(), 11);
+}
+
+#[test]
+fn dfs_cycle_error() {
+    let mut graph = Graph::default();
+    let n0 = graph.add_node(3);
+    let n1 = graph.add_node(10);
+    let n2 = graph.add_node(-2);
+    let n3 = graph.add_node(7);
+    let n4 = graph.add_node(4);
+    let n5 = graph.add_node(11);
+    let n6 = graph.add_node(0);
+    let n7 = graph.add_node(9);
+    graph.add_edge(n0, n1).unwrap();
+    graph.add_edge(n0, n2).unwrap();
+    graph.add_edge(n1, n3).unwrap();
+    graph.add_edge(n1, n4).unwrap();
+    graph.add_edge(n2, n5).unwrap();
+    graph.add_edge(n2, n6).unwrap();
+    graph.add_edge(n6, n7).unwrap();
+    graph.add_edge(n7, n2).unwrap();
+    //            n0(3) 
+    //          /       \ 
+    //    n1(10)         n2(-2)a <---+
+    //     /  \           /  \       |
+    // n3(7)  n4(4)  n5(11)  n6(0)   |
+    //                        |      |
+    //                       n7(9) --+
+
+    let mut inner_nodes = HashSet::new();
+    let mut leaves = HashSet::new();
+
+    let result =
+    graph.depth_first_traverse(|value: &mut i32, children: Vec<&mut i32>| {
+        // preorder
+        if children.len() == 0 {
+            leaves.insert(*value);
+        }
+        else {
+            inner_nodes.insert(*value);
+        }
+        Ok(())
+    }, 
+    |value: &mut i32, children: Vec<i32>| {
+        // postorder
+        // Move maximum value into the root.
+        if let Some(max_child) = children.iter().max() {
+            if *max_child > *value {
+                *value = *max_child;
+            }
+        }
+        Ok(*value)
+    });
+
+    match result {
+        Err(GraphError::Cycle { ixs, finished }) => {
+            assert_eq!(ixs, vec![2, 7, 6]);
+            assert_eq!(finished, true);
+        },
+        _ => panic!("graph.depth_first_traverse(...) shuld have faild"),
+    }
+}
+
+#[test]
+fn dfs_error_no_root() {
+    let mut graph = Graph::default();
+    let n0 = graph.add_node(3);
+    let n1 = graph.add_node(10);
+    let n2 = graph.add_node(-2);
+    let n3 = graph.add_node(7);
+    let n4 = graph.add_node(4);
+    let n5 = graph.add_node(11);
+    let n6 = graph.add_node(0);
+    graph.add_edge(n0, n1).unwrap();
+    graph.add_edge(n0, n2).unwrap();
+    graph.add_edge(n1, n3).unwrap();
+    graph.add_edge(n1, n4).unwrap();
+    graph.add_edge(n2, n5).unwrap();
+    graph.add_edge(n2, n6).unwrap();
+    graph.add_edge(n6, n0).unwrap();
+    //            n0(3) <------------+
+    //          /       \            |
+    //    n1(10)         n2(-2)a     |
+    //     /  \           /  \       |
+    // n3(7)  n4(4)  n5(11)  n6(0) --+
+
+    let mut inner_nodes = HashSet::new();
+    let mut leaves = HashSet::new();
+
+    let result =
+    graph.depth_first_traverse(|value: &mut i32, children: Vec<&mut i32>| {
+        // preorder
+        if children.len() == 0 {
+            leaves.insert(*value);
+        }
+        else {
+            inner_nodes.insert(*value);
+        }
+        Ok(())
+    }, 
+    |value: &mut i32, children: Vec<i32>| {
+        // postorder
+        // Move maximum value into the root.
+        if let Some(max_child) = children.iter().max() {
+            if *max_child > *value {
+                *value = *max_child;
+            }
+        }
+        Ok(*value)
+    });
+
+    assert!(matches!(result, Err(GraphError::NoRoot)));
+}

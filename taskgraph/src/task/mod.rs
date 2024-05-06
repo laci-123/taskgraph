@@ -47,7 +47,7 @@ pub type TaskId = u32;
 
 #[derive(Serialize, Deserialize)]
 #[derive(PartialEq, Eq, Debug)]
-struct Recurrence {
+pub struct Recurrence {
     #[serde(serialize_with = "serialize_duration", deserialize_with = "deserialize_duration")]
     repeat: Duration,
     repeat_base: RepeatBase,

@@ -1,13 +1,13 @@
 use std::{cell::UnsafeCell, collections::{hash_set, HashMap, HashSet}, error::Error};
+use std::fmt::Debug;
 
 
-#[derive(Default, PartialEq, Eq)]
+#[derive(Default, PartialEq, Eq, Debug)]
 enum Color {
     #[default]
     White,
     Gray,
     Black,
-    Red,
 }
 
 #[derive(Default)]
@@ -25,7 +25,7 @@ pub struct Graph<T> {
 
 const MAX_CALL_DEPTH: usize = 1000;
 
-impl<T> Graph<T> {
+impl<T: Debug> Graph<T> {
     pub fn add_node(&mut self, value: T) -> usize {
         let index = self.smallest_available_index();
         self.nodes.insert(index, UnsafeCell::new(Node {
@@ -59,7 +59,7 @@ impl<T> Graph<T> {
             return Err(GraphError::NonExistentNode(to));
         }
         let from_node = self.nodes.get_mut(&from).unwrap();
-        if from_node.get_mut().children.contains(&to) {
+        if from_node.get_mut().parents.contains(&to) {
             return Err(GraphError::Cycle{ixs: vec![from, to], finished: true});
         }
         from_node.get_mut().children.insert(to);
@@ -135,7 +135,7 @@ impl<T> Graph<T> {
         Ok(&mut *cell.get())
     }
 
-    pub fn depth_first_traverse<R>(&mut self, pre_action: impl PreAction<T>, post_action: impl PostAction<T, R>) -> Result<(), GraphError> {
+    pub fn depth_first_traverse<R>(&mut self, mut pre_action: impl PreAction<T>, mut post_action: impl PostAction<T, R>) -> Result<(), GraphError> {
         let roots = self.nodes
                         .iter()
                         .filter(|(_index, node)| {
@@ -144,12 +144,14 @@ impl<T> Graph<T> {
                             //       else either (which is guaranteed because this method
                             //       takes `&mut self`).
                             unsafe {
-                                (*node.get()).children.len() != 0
+                                (*node.get()).parents.len() == 0
                             }
                         })
                         .map(|(index, _node)| *index);
 
+        let mut there_are_roots = false;
         for root in roots {
+            there_are_roots = true;
             for node in self.nodes.values() {
                 // SAFE: This reference is only alive within this iteration of
                 //       the inner for loop and there are no other references
@@ -160,13 +162,18 @@ impl<T> Graph<T> {
                 }
             }
             // There are no references to any node when `dfs` is called.
-            self.dfs(root, &pre_action, &post_action, 0)?;
+            self.dfs(root, &mut pre_action, &mut post_action, 0)?;
         }
 
-        Ok(())
+        if self.nodes.len() == 0 || there_are_roots {
+            Ok(())
+        }
+        else {
+            Err(GraphError::NoRoot)
+        }
     }
 
-    fn dfs<R>(&self, root_ix: usize, pre_action: &impl PreAction<T>, post_action: &impl PostAction<T, R>, call_depth: usize) -> Result<Option<R>, GraphError> {
+    fn dfs<R>(&self, root_ix: usize, pre_action: &mut impl PreAction<T>, post_action: &mut impl PostAction<T, R>, call_depth: usize) -> Result<Option<R>, GraphError> {
         // `dfs` is only ever called from `depth_first_traverse` or from itself recursively
         // which both guarantee that when `dfs` is called there are no references alive to any node.
         
@@ -181,13 +188,14 @@ impl<T> Graph<T> {
             let root_mut = unsafe {
                 self.get_node_mut(root_ix)?
             };
+            println!("ID: {}, COLOR: {:?}", root_ix, root_mut.color);
             if root_mut.color == Color::Gray {
-                root_mut.color = Color::Red;
                 return Err(GraphError::Cycle{ixs: vec![root_ix], finished: false});
             }
             else if root_mut.color == Color::Black {
                 return Ok(None);
             }
+            root_mut.color = Color::Gray;
 
             child_ixs = root_mut.children.clone();
             let mut children = Vec::new();
@@ -208,7 +216,20 @@ impl<T> Graph<T> {
         let mut children = Vec::new();
         for child_ix in child_ixs.iter() {
             // There are no references to any node when `dfs` is called.
-            if let Some(r) = self.dfs(*child_ix, pre_action, post_action, call_depth + 1)? {
+            let return_value = 
+            match self.dfs(*child_ix, pre_action, post_action, call_depth + 1) {
+                Err(GraphError::Cycle{ixs: mut cycle, finished: false}) => {
+                    if cycle[0] == root_ix {
+                        Err(GraphError::Cycle{ixs: cycle, finished: true})
+                    }
+                    else {
+                        cycle.push(root_ix);
+                        Err(GraphError::Cycle{ixs: cycle, finished: false})
+                    }
+                },
+                other => other,
+            }?;
+            if let Some(r) = return_value {
                 children.push(r);
             }
         }
@@ -220,45 +241,32 @@ impl<T> Graph<T> {
                 self.get_node_mut(root_ix)?
             };
 
-            let return_value =
-            match post_action.call(&mut root_mut.value, children).map_err(|error| GraphError::Other(error)) {
-                Err(GraphError::Cycle{ixs: mut cycle, finished: false}) => {
-                    if root_mut.color == Color::Red {
-                        Err(GraphError::Cycle{ixs: cycle, finished: true})
-                    }
-                    else {
-                        cycle.push(root_ix);
-                        Err(GraphError::Cycle{ixs: cycle, finished: false})
-                    }
-                },
-                other => other,
-            };
-
             root_mut.color = Color::Black;
-
-            return_value.map(|r| Some(r))
+            post_action.call(&mut root_mut.value, children)
+                       .map_err(|error| GraphError::Other(error))
+                       .map(|r| Some(r))
         }
     }
 }
 
 
 pub trait PreAction<T> {
-    fn call(&self, value: &mut T, children: Vec<&mut T>) -> Result<(), Box<dyn Error>>;
+    fn call(&mut self, value: &mut T, children: Vec<&mut T>) -> Result<(), Box<dyn Error>>;
 }
 
-impl<T, F: Fn(&mut T, Vec<&mut T>) -> Result<(), Box<dyn Error>>> PreAction<T> for F {
-    fn call(&self, value: &mut T, children: Vec<&mut T>) -> Result<(), Box<dyn Error>> {
+impl<T, F: FnMut(&mut T, Vec<&mut T>) -> Result<(), Box<dyn Error>>> PreAction<T> for F {
+    fn call(&mut self, value: &mut T, children: Vec<&mut T>) -> Result<(), Box<dyn Error>> {
         self(value, children)
     }
 }
 
 
 pub trait PostAction<T, R> {
-    fn call(&self, value: &mut T, children: Vec<R>) -> Result<R, Box<dyn Error>>;
+    fn call(&mut self, value: &mut T, children: Vec<R>) -> Result<R, Box<dyn Error>>;
 }
 
-impl<T, R, F: Fn(&mut T, Vec<R>) -> Result<R, Box<dyn Error>>> PostAction<T, R> for F {
-    fn call(&self, value: &mut T, children: Vec<R>) -> Result<R, Box<dyn Error>> {
+impl<T, R, F: FnMut(&mut T, Vec<R>) -> Result<R, Box<dyn Error>>> PostAction<T, R> for F {
+    fn call(&mut self, value: &mut T, children: Vec<R>) -> Result<R, Box<dyn Error>> {
         self(value, children)
     }
 }
@@ -271,6 +279,7 @@ pub enum GraphError {
         finished: bool
     },
     NonExistentNode(usize),
+    NoRoot,
     StackOverflow,
     Other(Box<dyn Error>),
 }
