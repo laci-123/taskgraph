@@ -328,3 +328,18 @@ fn dfs_error_no_root() {
 
     assert!(matches!(result, Err(GraphError::NoRoot)));
 }
+
+#[test]
+fn dfs_stackoverflow() {
+    let mut graph = Graph::default();
+    graph.add_node(0);
+    for i in 1 .. 2000 {
+        graph.add_node(i);
+        graph.add_edge(i, i - 1).unwrap(); 
+    }
+
+    let result =
+    graph.depth_first_traverse(|_value: &mut usize, _children: Vec<&mut usize>| Ok(()), |_value: &mut usize, _children: Vec<i32>| Ok(3));
+
+    assert!(matches!(result, Err(GraphError::StackOverflow)));
+}
