@@ -2,6 +2,7 @@ use chrono::Duration;
 use crate::timepoint::{SecondsSinceEpoch, TimePoint};
 use serde::{Serialize, Deserialize, Serializer, Deserializer};
 use smart_default::SmartDefault;
+use wasm_bindgen::prelude::*;
 
 
 trait IsDefault {
@@ -17,6 +18,7 @@ impl<T: Default + PartialEq> IsDefault for T {
 
 #[derive(Serialize, Deserialize)]
 #[derive(Default, PartialEq, Eq, Clone, Copy, Debug)]
+#[wasm_bindgen]
 pub enum Progress {
     #[default]
     Todo,
@@ -27,6 +29,7 @@ pub enum Progress {
 
 #[derive(Serialize, Deserialize)]
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
+#[wasm_bindgen]
 pub enum ComputedProgress {
     Blocked,
     NotYet,
@@ -38,7 +41,8 @@ pub enum ComputedProgress {
 
 #[derive(Serialize, Deserialize)]
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
-enum RepeatBase {
+#[wasm_bindgen]
+pub enum RepeatBase {
     Finished,
     Deadline,
 }

@@ -2,6 +2,7 @@
 
 use wasm_bindgen::prelude::*;
 
+
 #[wasm_bindgen]
 extern "C" {
     fn alert(s: &str);
@@ -28,6 +29,7 @@ pub fn some_string(x: i32, y: i32) -> String {
 
 mod timepoint;
 mod task;
+mod jstask;
 mod mutcell;
 mod graph;
 mod tg;
