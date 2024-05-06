@@ -1,5 +1,8 @@
+use crate::utils::assert_eq_json;
+
 use super::*;
 use pretty_assertions::assert_eq;
+use serde_json::json;
 use thiserror::Error;
 
 #[test]
@@ -446,4 +449,60 @@ fn dfs_stackoverflow() {
     graph.depth_first_traverse(|_value: &mut usize, _children: Vec<&mut usize>| Ok(()), |_value: &mut usize, _children: Vec<i32>| Ok(3));
 
     assert!(matches!(result, Err(GraphError::StackOverflow)));
+}
+
+#[test]
+fn serialize() {
+    let mut graph = Graph::default();
+    let n0 = graph.add_node(3);
+    let n1 = graph.add_node(10);
+    graph.add_edge(n0, n1).unwrap();
+
+    let s = serde_json::to_string(&graph).unwrap();
+    assert_eq_json(&s, json!({
+        "0": {
+            "value": 3,
+            "parents": [],
+            "children": [1]
+        },
+        "1": {
+            "value": 10,
+            "parents": [0],
+            "children": []
+        }
+    }));
+}
+
+#[test]
+fn deserialize() {
+    let json_str = r#"
+        {
+            "0": {
+                "value": 3,
+                "parents": [],
+                "children": [1, 2]
+            },
+            "1": {
+                "value": 10,
+                "parents": [0],
+                "children": []
+            },
+            "2": {
+                "value": -1,
+                "parents": [0],
+                "children": []
+            }
+        }
+    "#;
+
+    let graph: Graph<i32> = serde_json::from_str(&json_str).unwrap();
+    assert_eq!(*graph.get(0).unwrap(), 3);
+    assert_eq!(*graph.get(1).unwrap(), 10);
+    assert_eq!(*graph.get(2).unwrap(), -1);
+    assert_eq!(iter_to_set(graph.get_children(0)), HashSet::from([1, 2]));
+    assert_eq!(iter_to_set(graph.get_children(1)), HashSet::from([]));
+    assert_eq!(iter_to_set(graph.get_children(2)), HashSet::from([]));
+    assert_eq!(iter_to_set(graph.get_parents(0)), HashSet::from([]));
+    assert_eq!(iter_to_set(graph.get_parents(1)), HashSet::from([0]));
+    assert_eq!(iter_to_set(graph.get_parents(2)), HashSet::from([0]));
 }

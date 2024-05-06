@@ -1,5 +1,7 @@
-use std::{cell::UnsafeCell, collections::{hash_set, HashMap, HashSet}, error::Error};
+use std::{cell::UnsafeCell, collections::{hash_set, HashMap, HashSet}, error::Error, mem::transmute};
 use std::fmt::Debug;
+use serde::{Serialize, Serializer, Deserialize, Deserializer};
+use serde::ser::SerializeMap;
 
 
 #[derive(Default, PartialEq, Eq, Debug)]
@@ -10,11 +12,12 @@ enum Color {
     Black,
 }
 
-#[derive(Default)]
+#[derive(Default, Serialize, Deserialize)]
 struct Node<T> {
     value: T,
     parents: HashSet<usize>,
     children: HashSet<usize>,
+    #[serde(skip)]
     color: Color,
 }
 
@@ -25,7 +28,35 @@ pub struct Graph<T> {
 
 const MAX_CALL_DEPTH: usize = 1000;
 
-impl<T: Debug> Graph<T> {
+impl<T: Serialize> Serialize for Graph<T> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let mut map = serializer.serialize_map(Some(self.nodes.len()))?;
+        for (ix, cell) in self.nodes.iter() {
+            // SAFE: This is the only reference to this particular node, 
+            //       as it is only alive for this iteration of the foor loop.
+            let node = 
+            unsafe {
+                &*cell.get() as &Node<T>
+            };
+            map.serialize_entry(ix, node)?;
+        }
+        map.end()
+    }
+}
+
+impl<'de, T: Deserialize<'de>> Deserialize<'de> for Graph<T> {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        let map: HashMap<usize, Node<T>> = HashMap::deserialize(d)?;
+        let nodes = 
+        unsafe {
+            // SAFE: T ans UnsafeCell<T> are guaranteed to have the same in-memory representation
+            transmute(map)
+        };
+        Ok(Graph{ nodes })
+    }
+}
+
+impl<T> Graph<T> {
     pub fn add_node(&mut self, value: T) -> usize {
         let index = self.smallest_available_index();
         self.nodes.insert(index, UnsafeCell::new(Node {
@@ -188,7 +219,6 @@ impl<T: Debug> Graph<T> {
             let root_mut = unsafe {
                 self.get_node_mut(root_ix)?
             };
-            println!("ID: {}, COLOR: {:?}", root_ix, root_mut.color);
             if root_mut.color == Color::Gray {
                 return Err(GraphError::Cycle{ixs: vec![root_ix], finished: false});
             }
