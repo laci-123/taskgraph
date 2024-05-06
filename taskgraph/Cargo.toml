@@ -20,6 +20,7 @@ smart-default = "0.7.1"
 
 [dev-dependencies]
 pretty_assertions = "1.4.0"
+thiserror = "1.0.59"
 
 [profile.release]
 opt-level = "s"

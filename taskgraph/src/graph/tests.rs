@@ -1,5 +1,6 @@
 use super::*;
 use pretty_assertions::assert_eq;
+use thiserror::Error;
 
 #[test]
 fn graph_default() {
@@ -327,6 +328,109 @@ fn dfs_error_no_root() {
     });
 
     assert!(matches!(result, Err(GraphError::NoRoot)));
+}
+
+#[derive(Error, Debug)]
+enum TestError {
+    #[error("Something very bad happend: {0}")]
+    Description(String),
+}
+
+#[test]
+fn dfs_error_from_pre_callback() {
+    let mut graph = Graph::default();
+    let n0 = graph.add_node(3);
+    let n1 = graph.add_node(10);
+    let n2 = graph.add_node(-2);
+    let n3 = graph.add_node(7);
+    let n4 = graph.add_node(4);
+    let n5 = graph.add_node(11);
+    let n6 = graph.add_node(0);
+    graph.add_edge(n0, n1).unwrap();
+    graph.add_edge(n0, n2).unwrap();
+    graph.add_edge(n1, n3).unwrap();
+    graph.add_edge(n1, n4).unwrap();
+    graph.add_edge(n2, n5).unwrap();
+    graph.add_edge(n2, n6).unwrap();
+    //            n0(3)
+    //          /       \        
+    //    n1(10)         n2(-2)a 
+    //     /  \           /  \   
+    // n3(7)  n4(4)  n5(11)  n6(0) 
+
+    let result =
+    graph.depth_first_traverse(|_value: &mut i32, children: Vec<&mut i32>| {
+        // preorder
+        if children.len() == 0 {
+            Err(Box::new(TestError::Description("Oops!".to_string())) as Box<dyn Error>)
+        }
+        else {
+            Ok(())
+        }
+    }, 
+    |value: &mut i32, _children: Vec<i32>| {
+        // postorder
+        Ok(*value)
+    });
+
+    match result {
+        Err(GraphError::Other(err)) => {
+            assert_eq!(format!("{}", err), "Something very bad happend: Oops!");
+        }
+        _ => {
+            panic!("graph.depth_first_traverse(...) should have failed");
+        }
+    }
+}
+
+#[test]
+fn dfs_error_from_post_callback() {
+    let mut graph = Graph::default();
+    let n0 = graph.add_node(3);
+    let n1 = graph.add_node(10);
+    let n2 = graph.add_node(-2);
+    let n3 = graph.add_node(7);
+    let n4 = graph.add_node(4);
+    let n5 = graph.add_node(11);
+    let n6 = graph.add_node(0);
+    graph.add_edge(n0, n1).unwrap();
+    graph.add_edge(n0, n2).unwrap();
+    graph.add_edge(n1, n3).unwrap();
+    graph.add_edge(n1, n4).unwrap();
+    graph.add_edge(n2, n5).unwrap();
+    graph.add_edge(n2, n6).unwrap();
+    //            n0(3)
+    //          /       \        
+    //    n1(10)         n2(-2)a 
+    //     /  \           /  \   
+    // n3(7)  n4(4)  n5(11)  n6(0) 
+
+    let result =
+    graph.depth_first_traverse(|value: &mut i32, children: Vec<&mut i32>| {
+        // preorder
+        if children.len() == 0 {
+            *value = 42;
+        }
+        Ok(())
+    }, 
+    |value: &mut i32, _children: Vec<i32>| {
+        // postorder
+        if *value == 42 {
+            Err(Box::new(TestError::Description(":-(".to_string())) as Box<dyn Error>)
+        }
+        else {
+            Ok(*value)
+        }
+    });
+
+    match result {
+        Err(GraphError::Other(err)) => {
+            assert_eq!(format!("{}", err), "Something very bad happend: :-(");
+        }
+        _ => {
+            panic!("graph.depth_first_traverse(...) should have failed");
+        }
+    }
 }
 
 #[test]
