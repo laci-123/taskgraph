@@ -283,7 +283,7 @@ fn dfs_cycle_error() {
 }
 
 #[test]
-fn dfs_error_no_root() {
+fn dfs_error_cycle_no_roots() {
     let mut graph = Graph::default();
     let n0 = graph.add_node(3);
     let n1 = graph.add_node(10);
@@ -330,7 +330,13 @@ fn dfs_error_no_root() {
         Ok(*value)
     });
 
-    assert!(matches!(result, Err(GraphError::NoRoot)));
+    match result {
+        Err(GraphError::Cycle { ixs, finished }) => {
+            assert_eq!(ixs, vec![6, 2, 0]);
+            assert_eq!(finished, true);
+        },
+        _ => panic!("graph.depth_first_traverse(...) shuld have faild"),
+    }
 }
 
 #[derive(Error, Debug)]

@@ -4,7 +4,7 @@ use serde::{Serialize, Serializer, Deserialize, Deserializer};
 use serde::ser::SerializeMap;
 
 
-#[derive(Default, PartialEq, Eq, Debug)]
+#[derive(Default, PartialEq, Eq, Debug, Clone, Copy)]
 enum Color {
     #[default]
     White,
@@ -166,6 +166,13 @@ impl<T> Graph<T> {
         Ok(&mut *cell.get())
     }
 
+    // SAFETY: Caller should ensure that there are no mutable references to any node.
+    unsafe fn reset_color(&self) {
+        for node in self.nodes.values() {
+            (*node.get()).color = Color::White;
+        }
+    }
+
     pub fn depth_first_traverse<R>(&mut self, mut pre_action: impl PreAction<T>, mut post_action: impl PostAction<T, R>) -> Result<(), GraphError> {
         let roots = self.nodes
                         .iter()
@@ -183,31 +190,67 @@ impl<T> Graph<T> {
         let mut there_are_roots = false;
         for root in roots {
             there_are_roots = true;
-            for node in self.nodes.values() {
-                // SAFE: This reference is only alive within this iteration of
-                //       the inner for loop and there are no other references
-                //       alive from anywhere else either (which is guaranteed
-                //       because this method takes `&mut self`).
-                unsafe {
-                    (*node.get()).color = Color::White;
-                }
+            // SAFE: There are no references alive to any node from aywhere 
+            //       which is guaranteed because this method
+            //       takes `&mut self`).
+            unsafe {
+                self.reset_color();
+                self.dfs(root, &mut pre_action, &mut post_action, 0)?;
             }
-            // There are no references to any node when `dfs` is called.
-            self.dfs(root, &mut pre_action, &mut post_action, 0)?;
         }
 
         if self.nodes.len() == 0 || there_are_roots {
             Ok(())
         }
         else {
-            Err(GraphError::NoRoot)
+            let cycle = self.find_cycle()?.unwrap(); // There must be at least 1 cycle if there are nodes but no roots.
+            Err(GraphError::Cycle { ixs: cycle, finished: true })
         }
     }
 
-    fn dfs<R>(&self, root_ix: usize, pre_action: &mut impl PreAction<T>, post_action: &mut impl PostAction<T, R>, call_depth: usize) -> Result<Option<R>, GraphError> {
-        // `dfs` is only ever called from `depth_first_traverse` or from itself recursively
-        // which both guarantee that when `dfs` is called there are no references alive to any node.
-        
+    fn find_cycle(&mut self) -> Result<Option<Vec<usize>>, GraphError> {
+        for node in self.nodes.values_mut() {
+            node.get_mut().color = Color::White;
+        }
+
+        for (ix, node) in self.nodes.iter() {
+            // SAFE: There are no references alive to any node from aywhere 
+            //       which is guaranteed because this method takes `&mut self`).
+            //       This reference is only alive in whithin the unsafe block
+            //       (`color` is copied out).
+            let color =
+            unsafe {
+                (*node.get()).color
+            };
+            if color == Color::White {
+                // SAFE: There are no references alive to any node from aywhere 
+                //       which is guaranteed because this method takes `&mut self`)
+                //       and there are also no references from within the 
+                //       method (see previous saftey note).
+                let result =
+                unsafe {
+                    self.dfs_no_action(*ix)
+                };
+                match result {
+                    Err(GraphError::Cycle { ixs, .. }) => return Ok(Some(ixs)),
+                    Err(other_err)                     => return Err(other_err),
+                    _                                  => {},
+                }
+            }
+        }
+
+        Ok(None)
+    }
+
+    // SAFETY: Caller must ensure that there are no references to any nodes.
+    unsafe fn dfs_no_action(&self, root_ix: usize) -> Result<(), GraphError> {
+        let mut pre_action  = |_: &mut T, _: Vec<&mut T>| Ok(());
+        let mut post_action = |_: &mut T, _: Vec<()>|     Ok(());
+        self.dfs(root_ix, &mut pre_action, &mut post_action, 0).map(|x| x.unwrap())
+    }
+
+    // SAFETY: Caller must ensure that there are no references to any nodes.
+    unsafe fn dfs<R>(&self, root_ix: usize, pre_action: &mut impl PreAction<T>, post_action: &mut impl PostAction<T, R>, call_depth: usize) -> Result<Option<R>, GraphError> {
         if call_depth > MAX_CALL_DEPTH {
             return Err(GraphError::StackOverflow);
         }
@@ -309,7 +352,6 @@ pub enum GraphError {
         finished: bool
     },
     NonExistentNode(usize),
-    NoRoot,
     StackOverflow,
     Other(Box<dyn Error>),
 }
