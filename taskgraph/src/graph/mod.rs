@@ -28,6 +28,12 @@ pub struct Graph<T> {
 
 const MAX_CALL_DEPTH: usize = 1000;
 
+// It would be very nice if these could be an enum, 
+// but enums as const parameters are still an experimental feature.
+type DfsDirection = bool;
+const TOWARDS_CHILDREN: DfsDirection = true;
+const TOWARDS_PARENTS:  DfsDirection = false;
+
 impl<T: Serialize> Serialize for Graph<T> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(self.nodes.len()))?;
@@ -195,7 +201,7 @@ impl<T> Graph<T> {
             //       takes `&mut self`).
             unsafe {
                 self.reset_color();
-                self.dfs(root, &mut pre_action, &mut post_action, 0)?;
+                self.dfs::<TOWARDS_CHILDREN, R>(root, &mut pre_action, &mut post_action, 0)?;
             }
         }
 
@@ -208,32 +214,46 @@ impl<T> Graph<T> {
         }
     }
 
-    pub fn possible_children(&mut self, node_ix: usize) -> Result<Vec<usize>, GraphError> {
+    pub fn possible_children(&mut self, root_ix: usize) -> Result<HashSet<usize>, GraphError> {
         for node in self.nodes.values_mut() {
             node.get_mut().color = Color::White;
         }
 
         // SAFE: There are no references alive to any node from aywhere 
-        //       which is guaranteed because this method
-        //       takes `&mut self`.
+        //       which is guaranteed because this method takes `&mut self`.
         unsafe {
-            self.dfs_no_action(node_ix)?;
+            self.dfs_no_action::<TOWARDS_PARENTS>(root_ix)?;
         }
 
-        let result = self.nodes
-                         .iter()
-                         .filter(|(_ix, node)| {
-                            // SAFE: There are no references alive to any node from aywhere 
-                            //       which is guaranteed because this method
-                            //       takes `&mut self` and this reference is only alive
-                            //       within this closure.
-                            unsafe {
-                                (*node.get()).color == Color::White
-                            }
-                         })
-                         .map(|(ix, _node)| *ix)
-                         .collect();
-        Ok(result)
+        let mut ancestors =
+        self.nodes
+            .iter()
+            .filter(|(_ix, node)| {
+                // SAFE: There are no references alive to any node from aywhere 
+                //       which is guaranteed because this method takes `&mut self`.
+                //       This reference is only alive in whithin the unsafe block
+                //       (`color` is copied out).
+                let color =
+                unsafe {
+                    (*node.get()).color
+                };
+                color == Color::White
+            })
+            .map(|(ix, _node)| *ix)
+            .collect::<HashSet<usize>>();
+
+        // SAFE: There are no references alive to any node from aywhere 
+        //       which is guaranteed because this method takes `&mut self`.
+        let root =
+        unsafe {
+            self.get_node(root_ix)?
+        };
+
+        for child_ix in root.children.iter() {
+            ancestors.remove(child_ix);
+        }
+
+        Ok(ancestors)
     }
 
     fn find_cycle(&mut self) -> Result<Option<Vec<usize>>, GraphError> {
@@ -257,7 +277,7 @@ impl<T> Graph<T> {
                 //       method (see previous saftey note).
                 let result =
                 unsafe {
-                    self.dfs_no_action(*ix)
+                    self.dfs_no_action::<TOWARDS_CHILDREN>(*ix)
                 };
                 match result {
                     Err(GraphError::Cycle { ixs, .. }) => return Ok(Some(ixs)),
@@ -271,19 +291,19 @@ impl<T> Graph<T> {
     }
 
     // SAFETY: Caller must ensure that there are no references to any nodes.
-    unsafe fn dfs_no_action(&self, root_ix: usize) -> Result<(), GraphError> {
+    unsafe fn dfs_no_action<const D: DfsDirection>(&self, root_ix: usize) -> Result<(), GraphError> {
         let mut pre_action  = |_: &mut T, _: Vec<&mut T>| Ok(());
         let mut post_action = |_: &mut T, _: Vec<()>|     Ok(());
-        self.dfs(root_ix, &mut pre_action, &mut post_action, 0).map(|x| x.unwrap())
+        self.dfs::<D, ()>(root_ix, &mut pre_action, &mut post_action, 0).map(|x| x.unwrap())
     }
 
     // SAFETY: Caller must ensure that there are no references to any nodes.
-    unsafe fn dfs<R>(&self, root_ix: usize, pre_action: &mut impl PreAction<T>, post_action: &mut impl PostAction<T, R>, call_depth: usize) -> Result<Option<R>, GraphError> {
+    unsafe fn dfs<const D: DfsDirection, R>(&self, root_ix: usize, pre_action: &mut impl PreAction<T>, post_action: &mut impl PostAction<T, R>, call_depth: usize) -> Result<Option<R>, GraphError> {
         if call_depth > MAX_CALL_DEPTH {
             return Err(GraphError::StackOverflow);
         }
 
-        let child_ixs;
+        let next_ixs;
         {
             // SAFE: This reference to this node is only alive within this block
             //       where no other references of this node are used.
@@ -298,27 +318,33 @@ impl<T> Graph<T> {
             }
             root_mut.color = Color::Gray;
 
-            child_ixs = root_mut.children.clone();
-            let mut children = Vec::new();
-            for child_ix in child_ixs.iter() {
-                if *child_ix == root_ix {
-                    return Err(GraphError::Cycle{ixs: vec![*child_ix, root_ix], finished: true});
+            next_ixs = 
+            if D == TOWARDS_CHILDREN {
+                root_mut.children.clone()
+            }
+            else {
+                root_mut.parents.clone()
+            };
+            let mut nexts = Vec::new();
+            for next_ix in next_ixs.iter() {
+                if *next_ix == root_ix {
+                    return Err(GraphError::Cycle{ixs: vec![*next_ix, root_ix], finished: true});
                 }
                 // SAFE: The previous check ensures that no reference in `children` can be
                 // of the same node as `root_mut`. And because `children` is a HashSet
                 // all of them must reference diffent nodes.
                 unsafe {
-                    children.push(&mut self.get_node_mut(*child_ix)?.value);
+                    nexts.push(&mut self.get_node_mut(*next_ix)?.value);
                 }
             }
-            pre_action.call(&mut root_mut.value, children).map_err(|error| GraphError::Other(error))?;
+            pre_action.call(&mut root_mut.value, nexts).map_err(|error| GraphError::Other(error))?;
         }
 
-        let mut children = Vec::new();
-        for child_ix in child_ixs.iter() {
+        let mut nexts = Vec::new();
+        for next_ix in next_ixs.iter() {
             // There are no references to any node when `dfs` is called.
             let return_value = 
-            match self.dfs(*child_ix, pre_action, post_action, call_depth + 1) {
+            match self.dfs::<D, R>(*next_ix, pre_action, post_action, call_depth + 1) {
                 Err(GraphError::Cycle{ixs: mut cycle, finished: false}) => {
                     if cycle[0] == root_ix {
                         Err(GraphError::Cycle{ixs: cycle, finished: true})
@@ -331,7 +357,7 @@ impl<T> Graph<T> {
                 other => other,
             }?;
             if let Some(r) = return_value {
-                children.push(r);
+                nexts.push(r);
             }
         }
 
@@ -343,7 +369,7 @@ impl<T> Graph<T> {
             };
 
             root_mut.color = Color::Black;
-            post_action.call(&mut root_mut.value, children)
+            post_action.call(&mut root_mut.value, nexts)
                        .map_err(|error| GraphError::Other(error))
                        .map(|r| Some(r))
         }
@@ -352,23 +378,23 @@ impl<T> Graph<T> {
 
 
 pub trait PreAction<T> {
-    fn call(&mut self, value: &mut T, children: Vec<&mut T>) -> Result<(), Box<dyn Error>>;
+    fn call(&mut self, value: &mut T, nexts: Vec<&mut T>) -> Result<(), Box<dyn Error>>;
 }
 
 impl<T, F: FnMut(&mut T, Vec<&mut T>) -> Result<(), Box<dyn Error>>> PreAction<T> for F {
-    fn call(&mut self, value: &mut T, children: Vec<&mut T>) -> Result<(), Box<dyn Error>> {
-        self(value, children)
+    fn call(&mut self, value: &mut T, nexts: Vec<&mut T>) -> Result<(), Box<dyn Error>> {
+        self(value, nexts)
     }
 }
 
 
 pub trait PostAction<T, R> {
-    fn call(&mut self, value: &mut T, children: Vec<R>) -> Result<R, Box<dyn Error>>;
+    fn call(&mut self, value: &mut T, nexts: Vec<R>) -> Result<R, Box<dyn Error>>;
 }
 
 impl<T, R, F: FnMut(&mut T, Vec<R>) -> Result<R, Box<dyn Error>>> PostAction<T, R> for F {
-    fn call(&mut self, value: &mut T, children: Vec<R>) -> Result<R, Box<dyn Error>> {
-        self(value, children)
+    fn call(&mut self, value: &mut T, nexts: Vec<R>) -> Result<R, Box<dyn Error>> {
+        self(value, nexts)
     }
 }
 

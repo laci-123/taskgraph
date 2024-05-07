@@ -480,6 +480,38 @@ fn dfs_stackoverflow() {
 }
 
 #[test]
+fn possible_children_of_node() {
+    let mut graph = Graph::default();
+    let n0 = graph.add_node(3);
+    let n1 = graph.add_node(10);
+    let n2 = graph.add_node(-2);
+    let n3 = graph.add_node(7);
+    let n4 = graph.add_node(4);
+    let n5 = graph.add_node(11);
+    let n6 = graph.add_node(0);
+    graph.add_edge(n0, n1).unwrap();
+    graph.add_edge(n0, n2).unwrap();
+    graph.add_edge(n1, n3).unwrap();
+    graph.add_edge(n1, n4).unwrap();
+    graph.add_edge(n2, n5).unwrap();
+    graph.add_edge(n2, n6).unwrap();
+    //            n0(3)
+    //          /       \        
+    //    n1(10)         n2(-2)a 
+    //     /  \           /  \   
+    // n3(7)  n4(4)  n5(11)  n6(0) 
+
+    let pc = graph.possible_children(0).unwrap();
+    assert_eq!(pc, HashSet::from([3, 4, 5, 6]));
+
+    let pc = graph.possible_children(1).unwrap();
+    assert_eq!(pc, HashSet::from([2, 5, 6]));
+
+    let pc = graph.possible_children(3).unwrap();
+    assert_eq!(pc, HashSet::from([4, 2, 5, 6]));
+}
+
+#[test]
 fn serialize() {
     let mut graph = Graph::default();
     let n0 = graph.add_node(3);
