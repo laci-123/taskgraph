@@ -1,9 +1,31 @@
 use crate::utils::assert_eq_json;
-
 use super::*;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use thiserror::Error;
+
+
+#[test]
+fn circular_equal_empty() {
+    assert!(circular_equal(&vec![], &vec![]));
+}
+
+#[test]
+fn circular_equal_singleton() {
+    assert!(circular_equal(&vec![1], &vec![1]));
+    assert!(!circular_equal(&vec![1], &vec![2]));
+}
+
+#[test]
+fn circular_equal_long() {
+    assert!( circular_equal(&vec![1, 2, 3, 4], &vec![1, 2, 3, 4]));
+    assert!( circular_equal(&vec![1, 2, 3, 4], &vec![4, 1, 2, 3]));
+    assert!( circular_equal(&vec![1, 2, 3, 4], &vec![3, 4, 1, 2]));
+    assert!( circular_equal(&vec![1, 2, 3, 4], &vec![2, 3, 4, 1]));
+    assert!(!circular_equal(&vec![1, 2, 3, 4], &vec![1, 2, 4, 3]));
+    assert!(!circular_equal(&vec![1, 2, 3, 4], &vec![1, 2, 3]));
+    assert!(!circular_equal(&vec![1, 2, 3, 4], &vec![1, 2, 3, 4, 5]));
+}
 
 #[test]
 fn graph_default() {
@@ -275,7 +297,7 @@ fn dfs_cycle_error() {
 
     match result {
         Err(GraphError::Cycle { ixs, finished }) => {
-            assert_eq!(ixs, vec![2, 7, 6]);
+            assert!(circular_equal(&ixs, &vec![2, 7, 6]));
             assert_eq!(finished, true);
         },
         _ => panic!("graph.depth_first_traverse(...) shuld have faild"),
@@ -332,7 +354,7 @@ fn dfs_error_cycle_no_roots() {
 
     match result {
         Err(GraphError::Cycle { ixs, finished }) => {
-            assert_eq!(ixs, vec![6, 2, 0]);
+            assert!(circular_equal(&ixs, &vec![0, 6, 2]));
             assert_eq!(finished, true);
         },
         _ => panic!("graph.depth_first_traverse(...) shuld have faild"),

@@ -208,6 +208,34 @@ impl<T> Graph<T> {
         }
     }
 
+    pub fn possible_children(&mut self, node_ix: usize) -> Result<Vec<usize>, GraphError> {
+        for node in self.nodes.values_mut() {
+            node.get_mut().color = Color::White;
+        }
+
+        // SAFE: There are no references alive to any node from aywhere 
+        //       which is guaranteed because this method
+        //       takes `&mut self`.
+        unsafe {
+            self.dfs_no_action(node_ix)?;
+        }
+
+        let result = self.nodes
+                         .iter()
+                         .filter(|(_ix, node)| {
+                            // SAFE: There are no references alive to any node from aywhere 
+                            //       which is guaranteed because this method
+                            //       takes `&mut self` and this reference is only alive
+                            //       within this closure.
+                            unsafe {
+                                (*node.get()).color == Color::White
+                            }
+                         })
+                         .map(|(ix, _node)| *ix)
+                         .collect();
+        Ok(result)
+    }
+
     fn find_cycle(&mut self) -> Result<Option<Vec<usize>>, GraphError> {
         for node in self.nodes.values_mut() {
             node.get_mut().color = Color::White;
@@ -354,6 +382,25 @@ pub enum GraphError {
     NonExistentNode(usize),
     StackOverflow,
     Other(Box<dyn Error>),
+}
+
+
+fn circular_equal(v1: &Vec<usize>, v2: &Vec<usize>) -> bool {
+    if v1.len() != v2.len() {
+        return false;
+    }
+    let len = v1.len();
+    if len == 0 {
+        return true;
+    }
+
+    for i in 0 .. len {
+        if v1.iter().cycle().skip(i).take(len).eq(v2.iter()) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 
