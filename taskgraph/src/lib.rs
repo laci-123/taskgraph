@@ -29,7 +29,7 @@ pub fn some_string(x: i32, y: i32) -> String {
 
 mod timepoint;
 mod task;
-mod jstask;
+mod js_bindings;
 mod mutcell;
 mod graph;
 mod tg;

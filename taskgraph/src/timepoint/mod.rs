@@ -32,6 +32,32 @@ impl TimePoint {
     }
 }
 
+impl From<TimePoint> for f64 {
+    fn from(tp: TimePoint) -> Self {
+        match tp {
+            TimePoint::BeforeEverything => f64::NEG_INFINITY,
+            TimePoint::Normal(x)        => x as f64,
+            TimePoint::AfterEverything  => f64::INFINITY,
+        }
+    }
+}
+
+impl From<f64> for TimePoint {
+    fn from(x: f64) -> Self {
+        if x.is_infinite() {
+            if x.is_sign_negative() {
+                TimePoint::BeforeEverything
+            }
+            else {
+                TimePoint::AfterEverything
+            }
+        }
+        else {
+            TimePoint::Normal(x as i64)
+        }
+    }
+}
+
 impl PartialOrd for TimePoint {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))

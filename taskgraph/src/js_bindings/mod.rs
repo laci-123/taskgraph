@@ -3,6 +3,46 @@ use wasm_bindgen::prelude::*;
 
 
 #[wasm_bindgen]
+pub struct JsError {
+    short_name: String,
+    details: String,
+}
+
+#[wasm_bindgen]
+impl JsError {
+    #[wasm_bindgen(getter)]
+    pub fn short_name(&self) -> String {
+        self.short_name.clone()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn details(&self) -> String {
+        self.details.clone()
+    }
+}
+
+
+#[wasm_bindgen]
+pub struct JsPossibleTask {
+    possible_progresses: Vec<Progress>,
+    possible_children: Vec<TaskId>, 
+}
+
+#[wasm_bindgen]
+impl JsPossibleTask {
+    #[wasm_bindgen(getter)]
+    pub fn possible_progresses(&self) -> Vec<Progress> {
+        self.possible_progresses.clone()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn possible_children(&self) -> Vec<TaskId> {
+        self.possible_children.clone()
+    }
+}
+
+
+#[wasm_bindgen]
 pub struct JsTask {
     #[wasm_bindgen(readonly)]
     pub id: TaskId,
@@ -35,7 +75,7 @@ pub struct JsTask {
     name: String,
     description: String,
     children: Vec<TaskId>,
-    available_progresses: Vec<Progress>,
+    parents: Vec<TaskId>,
 }
 
 #[wasm_bindgen]
@@ -58,12 +98,12 @@ impl JsTask {
         name: String,
         description: String,
         children: Vec<TaskId>,
-        available_progresses: Vec<Progress>
+        parents: Vec<TaskId>
     ) -> Self {
         Self {
             id, priority, computed_priority, deadline, computed_deadline, birthline,
             progress, computed_progress, group_like, auto_fail, finished, repeat,
-            repeat_base, next_instance, name, description, children, available_progresses,
+            repeat_base, next_instance, name, description, children, parents,
         }
     }
 
@@ -83,7 +123,7 @@ impl JsTask {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn available_progresses(&self) -> Vec<Progress> {
-        self.available_progresses.clone()
+    pub fn parents(&self) -> Vec<TaskId> {
+        self.parents.clone()
     }
 }
