@@ -22,6 +22,15 @@ impl JsError {
     }
 }
 
+impl JsError {
+    pub fn new(short_name: &str, details: &str) -> Self {
+        Self {
+            short_name: short_name.into(),
+            details: details.into(),
+        }
+    }
+}
+
 
 #[wasm_bindgen]
 pub struct JsPossibleTask {
@@ -127,7 +136,7 @@ impl JsTask {
 }
 
 impl JsTask {
-    pub fn from_task(task: &Task, id: TaskId, children: &[TaskId], parents: &[TaskId]) -> Self {
+    pub fn from_task(task: &Task, id: TaskId, children: impl Iterator<Item = usize>, parents: impl Iterator<Item = usize>) -> Self {
         Self { 
             id, 
             priority: task.priority, 
@@ -145,8 +154,8 @@ impl JsTask {
             next_instance: task.recurrence.as_ref().map(|r| r.next_instance), 
             name: task.name.clone(), 
             description: task.description.clone(), 
-            children: children.into(), 
-            parents: parents.into() 
+            children: children.collect(), 
+            parents: parents.collect(), 
         }
     }
 

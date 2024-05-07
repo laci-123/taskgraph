@@ -47,15 +47,15 @@ pub enum RepeatBase {
     Deadline,
 }
 
-pub type TaskId = u32;
+pub type TaskId = usize;
 
 #[derive(Serialize, Deserialize)]
 #[derive(PartialEq, Eq, Debug)]
 pub struct Recurrence {
     #[serde(serialize_with = "serialize_duration", deserialize_with = "deserialize_duration")]
-    repeat: Duration,
-    repeat_base: RepeatBase,
-    next_instance: TaskId,
+    pub repeat: Duration,
+    pub repeat_base: RepeatBase,
+    pub next_instance: TaskId,
 }
 
 fn serialize_duration<S: Serializer>(d: &Duration, s: S) -> Result<S::Ok, S::Error> {

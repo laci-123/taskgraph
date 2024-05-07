@@ -1,7 +1,8 @@
-use std::{cell::UnsafeCell, collections::{hash_set, HashMap, HashSet}, error::Error, mem::transmute};
+use std::{cell::UnsafeCell, collections::{hash_set, HashMap, HashSet}, error::Error, iter::Cycle, mem::transmute};
 use std::fmt::Debug;
 use serde::{Serialize, Serializer, Deserialize, Deserializer};
 use serde::ser::SerializeMap;
+use thiserror::Error;
 
 
 #[derive(Default, PartialEq, Eq, Debug, Clone, Copy)]
@@ -26,7 +27,7 @@ pub struct Graph<T> {
     nodes: HashMap<usize, UnsafeCell<Node<T>>>,
 }
 
-const MAX_CALL_DEPTH: usize = 1000;
+pub const MAX_CALL_DEPTH: usize = 1000;
 
 // It would be very nice if these could be an enum, 
 // but enums as const parameters are still an experimental feature.
@@ -399,14 +400,18 @@ impl<T, R, F: FnMut(&mut T, Vec<R>) -> Result<R, Box<dyn Error>>> PostAction<T, 
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum GraphError {
+    #[error("Circular dependencies: {ixs:?}")]
     Cycle{
         ixs: Vec<usize>,
         finished: bool
     },
+    #[error("Non-existent node (ID: {0})")]
     NonExistentNode(usize),
+    #[error("Stack overflow")]
     StackOverflow,
+    #[error(transparent)]
     Other(Box<dyn Error>),
 }
 
