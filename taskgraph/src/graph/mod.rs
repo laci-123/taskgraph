@@ -120,15 +120,8 @@ impl<T> Graph<T> {
         self.nodes.len()
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = &T> {
-        self.nodes.values().map(|node| {
-            // SAFE: This methods takes `&self` therefore 
-            //       there cannot be any mutable references to 
-            //       any of the nodes.
-            unsafe {
-                &(*node.get()).value
-            }
-        })
+    pub fn indexes<'a>(&'a self) -> impl Iterator<Item = usize> + 'a {
+        self.nodes.keys().copied()
     }
     
     pub fn get(&self, index: usize) -> Result<&T, GraphError> {

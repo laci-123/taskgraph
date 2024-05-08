@@ -84,8 +84,8 @@ pub struct JsTask {
     pub next_instance: Option<TaskId>,
     name: String,
     description: String,
-    children: Vec<TaskId>,
-    parents: Vec<TaskId>,
+    dependencies: Vec<TaskId>,
+    others_depending_on_this: Vec<TaskId>,
 }
 
 #[wasm_bindgen]
@@ -104,13 +104,13 @@ impl JsTask {
         next_instance: Option<TaskId>,
         name: String,
         description: String,
-        children: Vec<TaskId>,
+        dependencies: Vec<TaskId>,
     ) -> Self {
         Self {
             id: 0, priority, computed_priority: None, deadline, computed_deadline: None, 
             birthline, progress, computed_progress: None, group_like, auto_fail, 
             finished, repeat, repeat_base, next_instance, 
-            name, description, children, parents: vec![],
+            name, description, dependencies, others_depending_on_this: vec![],
         }
     }
 
@@ -125,13 +125,13 @@ impl JsTask {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn children(&self) -> Vec<TaskId> {
-        self.children.clone()
+    pub fn dependencies(&self) -> Vec<TaskId> {
+        self.dependencies.clone()
     }
 
     #[wasm_bindgen(getter)]
-    pub fn parents(&self) -> Vec<TaskId> {
-        self.parents.clone()
+    pub fn others_depending_on_this(&self) -> Vec<TaskId> {
+        self.others_depending_on_this.clone()
     }
 }
 
@@ -154,8 +154,8 @@ impl JsTask {
             next_instance: task.recurrence.as_ref().map(|r| r.next_instance), 
             name: task.name.clone(), 
             description: task.description.clone(), 
-            children: children.collect(), 
-            parents: parents.collect(), 
+            dependencies: children.collect(), 
+            others_depending_on_this: parents.collect(), 
         }
     }
 
@@ -186,6 +186,6 @@ impl JsTask {
             ..Default::default()
         };
         
-        (task, self.children)
+        (task, self.dependencies)
     }
 }

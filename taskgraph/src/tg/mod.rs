@@ -1,6 +1,9 @@
+use std::collections::HashSet;
+
+use tryvial::try_block;
+
 use crate::graph;
 use crate::js_bindings::JsError;
-use crate::utils::concat_str_iterator;
 use crate::{graph::{Graph, GraphError}, js_bindings::JsTask, task::{Task, TaskId}};
 
 
@@ -18,6 +21,40 @@ impl TaskGraph {
         let children = self.graph.get_children(id).ok()?.copied();
         let parents  = self.graph.get_parents(id).ok()?.copied();
         Some(JsTask::from_task(task, id, children, parents))
+    }
+
+    pub fn set_task(&mut self, js_task: JsTask) -> Result<(), JsError> {
+        let result: Result<(), GraphError> =
+        try_block! {
+            let (task, children) = js_task.to_task();
+            let id = self.graph.add_node(task);
+            for child in children {
+                self.graph.add_edge(id, child)?;
+            }
+            self.calculate()?;
+        };
+        result.map_err(|err| self.grapherror_to_jserror(err, "Error while saving task"))
+    }
+
+    pub fn delete_task(&mut self, id: TaskId) -> Result<(), JsError> {
+        self.graph.remove(id);
+        self.calculate().map_err(|err| self.grapherror_to_jserror(err, "Error while deleting task"))?;
+        Ok(())
+    }
+
+    pub fn all_tasks(&self) -> Result<Vec<JsTask>, JsError> {
+        let result: Result<Vec<JsTask>, GraphError> =
+        try_block! {
+            let mut js_tasks = Vec::new();
+            for ix in self.graph.indexes() {
+                let task     = self.graph.get(ix)?;
+                let children = self.graph.get_children(ix)?.copied();
+                let parents  = self.graph.get_parents(ix)?.copied();
+                js_tasks.push(JsTask::from_task(task, ix, children, parents));
+            }
+            js_tasks
+        };
+        result.map_err(|err| self.grapherror_to_jserror(err, "Error while collecting all tasks"))
     }
 
     fn grapherror_to_jserror(&self, err: GraphError, short_name: &str) -> JsError {
