@@ -59,17 +59,17 @@ pub struct JsTask {
     #[wasm_bindgen(readonly)]
     pub priority: i8,
     #[wasm_bindgen(readonly)]
-    pub computed_priority: Option<i8>,
+    pub computed_priority: i8,
     #[wasm_bindgen(readonly)]
     pub deadline: f64,
     #[wasm_bindgen(readonly)]
-    pub computed_deadline: Option<f64>,
+    pub computed_deadline: f64,
     #[wasm_bindgen(readonly)]
     pub birthline: f64,
     #[wasm_bindgen(readonly)]
     pub progress: Progress,
     #[wasm_bindgen(readonly)]
-    pub computed_progress: Option<ComputedProgress>,
+    pub computed_progress: ComputedProgress,
     #[wasm_bindgen(readonly)]
     pub group_like: bool,
     #[wasm_bindgen(readonly)]
@@ -92,6 +92,7 @@ pub struct JsTask {
 impl JsTask {
     #[wasm_bindgen(constructor)]
     pub fn new(
+        id: TaskId,
         priority: i8,
         deadline: f64,
         birthline: f64,
@@ -107,9 +108,9 @@ impl JsTask {
         dependencies: Vec<TaskId>,
     ) -> Self {
         Self {
-            id: 0, priority, computed_priority: None, deadline, computed_deadline: None, 
-            birthline, progress, computed_progress: None, group_like, auto_fail, 
-            finished, repeat, repeat_base, next_instance, 
+            id, priority, computed_priority: 0, deadline, computed_deadline: f64::INFINITY, 
+            birthline, progress, computed_progress: ComputedProgress::default(), 
+            group_like, auto_fail, finished, repeat, repeat_base, next_instance, 
             name, description, dependencies, others_depending_on_this: vec![],
         }
     }
@@ -142,7 +143,7 @@ impl JsTask {
             priority: task.priority, 
             computed_priority: task.computed_priority, 
             deadline: task.deadline.into(), 
-            computed_deadline: task.computed_deadline.map(|cd| cd.into()), 
+            computed_deadline: task.computed_deadline.into(), 
             birthline: task.birthline.into(), 
             progress: task.progress, 
             computed_progress: task.computed_progress, 

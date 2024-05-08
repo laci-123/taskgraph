@@ -58,6 +58,16 @@ impl From<f64> for TimePoint {
     }
 }
 
+impl From<TimePoint> for SecondsSinceEpoch {
+    fn from(tp: TimePoint) -> Self {
+        match tp {
+            TimePoint::BeforeEverything => i64::MIN,
+            TimePoint::Normal(x)        => x,
+            TimePoint::AfterEverything  => i64::MAX,
+        }
+    }
+}
+
 impl PartialOrd for TimePoint {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))

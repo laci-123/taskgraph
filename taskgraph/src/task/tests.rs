@@ -18,7 +18,7 @@ fn serialize_some_defaults() {
     task.name = "do something".to_string();
     task.priority = 3;
     task.progress = Progress::Started;
-    task.computed_progress = Some(ComputedProgress::Failed);
+    task.computed_progress = ComputedProgress::Failed;
 
     let json = serde_json::to_string(&task).unwrap();
     assert_eq_json(&json, json!({
@@ -34,12 +34,12 @@ fn serialize_no_defaults() {
     task.name = "do something".to_string();
     task.description = "Do some stuff.".to_string();
     task.priority = 3;
-    task.computed_priority = Some(4);
+    task.computed_priority = 4;
     task.deadline = TimePoint::Normal(100);
-    task.computed_deadline = Some(TimePoint::Normal(99));
+    task.computed_deadline = TimePoint::Normal(99);
     task.birthline = TimePoint::Normal(97);
     task.progress = Progress::Started;
-    task.computed_progress = Some(ComputedProgress::Failed);
+    task.computed_progress = ComputedProgress::Failed;
     task.group_like = true;
     task.auto_fail = true;
     task.finished = Some(98);
@@ -75,12 +75,12 @@ fn deserialise_all_defaults() {
     assert_eq!(task.name, "feed cat");
     assert_eq!(task.description, "");
     assert_eq!(task.priority, 0);
-    assert_eq!(task.computed_priority, None);
+    assert_eq!(task.computed_priority, 0);
     assert_eq!(task.deadline, TimePoint::AfterEverything);
-    assert_eq!(task.computed_deadline, None);
+    assert_eq!(task.computed_deadline, TimePoint::AfterEverything);
     assert_eq!(task.birthline, TimePoint::BeforeEverything);
     assert_eq!(task.progress, Progress::Todo);
-    assert_eq!(task.computed_progress, None);
+    assert_eq!(task.computed_progress, ComputedProgress::default());
     assert_eq!(task.group_like, false);
     assert_eq!(task.auto_fail, false);
     assert_eq!(task.finished, None);
@@ -109,12 +109,12 @@ fn deserialize_no_defaults() {
     assert_eq!(task.name, "do something");
     assert_eq!(task.description, "Do some stuff.");
     assert_eq!(task.priority, 3);
-    assert_eq!(task.computed_priority, None);
+    assert_eq!(task.computed_priority, 0);
     assert_eq!(task.deadline, TimePoint::Normal(100));
-    assert_eq!(task.computed_deadline, None);
+    assert_eq!(task.computed_deadline, TimePoint::AfterEverything);
     assert_eq!(task.birthline, TimePoint::Normal(97));
     assert_eq!(task.progress, Progress::Started);
-    assert_eq!(task.computed_progress, None);
+    assert_eq!(task.computed_progress, ComputedProgress::default());
     assert_eq!(task.group_like, true);
     assert_eq!(task.auto_fail, true);
     assert_eq!(task.finished, Some(98));

@@ -28,15 +28,27 @@ pub enum Progress {
 }
 
 #[derive(Serialize, Deserialize)]
-#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+#[derive(Default, PartialEq, Eq, Clone, Copy, Debug)]
 #[wasm_bindgen]
 pub enum ComputedProgress {
+    #[default]
     Blocked,
     NotYet,
     Todo,
     Started,
     Done,
     Failed,
+}
+
+impl From<Progress> for ComputedProgress {
+    fn from(value: Progress) -> Self {
+        match value {
+            Progress::Todo    => Self::Todo,
+            Progress::Started => Self::Started,
+            Progress::Done    => Self::Done,
+            Progress::Failed  => Self::Failed,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -50,7 +62,7 @@ pub enum RepeatBase {
 pub type TaskId = usize;
 
 #[derive(Serialize, Deserialize)]
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Recurrence {
     #[serde(serialize_with = "serialize_duration", deserialize_with = "deserialize_duration")]
     pub repeat: Duration,
@@ -68,6 +80,7 @@ fn deserialize_duration<'de, D: Deserializer<'de>>(d: D) -> Result<Duration, D::
 
 #[derive(Serialize, Deserialize)]
 #[derive(SmartDefault)]
+#[derive(Clone)]
 pub struct Task {
     pub name: String,
 
@@ -78,14 +91,15 @@ pub struct Task {
     pub priority: i8,
 
     #[serde(default, skip_serializing)]
-    pub computed_priority: Option<i8>,
+    pub computed_priority: i8,
 
     #[serde(default = "TimePoint::after_everything", skip_serializing_if = "TimePoint::is_after_everything")]
     #[default(TimePoint::AfterEverything)]
     pub deadline: TimePoint,
 
-    #[serde(default, skip_serializing)]
-    pub computed_deadline: Option<TimePoint>,
+    #[serde(default = "TimePoint::after_everything", skip_serializing)]
+    #[default(TimePoint::AfterEverything)]
+    pub computed_deadline: TimePoint,
 
     #[serde(default = "TimePoint::before_everything", skip_serializing_if = "TimePoint::is_before_everything")]
     #[default(TimePoint::BeforeEverything)]
@@ -95,7 +109,7 @@ pub struct Task {
     pub progress: Progress,
 
     #[serde(default, skip_serializing)]
-    pub computed_progress: Option<ComputedProgress>,
+    pub computed_progress: ComputedProgress,
 
     #[serde(default, skip_serializing_if = "IsDefault::is_default")]
     pub group_like: bool,

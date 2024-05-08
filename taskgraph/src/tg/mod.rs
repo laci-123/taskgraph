@@ -1,10 +1,19 @@
-use std::collections::HashSet;
-
 use tryvial::try_block;
-
 use crate::graph;
-use crate::js_bindings::JsError;
-use crate::{graph::{Graph, GraphError}, js_bindings::JsTask, task::{Task, TaskId}};
+use crate::js_bindings::{JsError, JsTask};
+use crate::task::{Progress, RepeatBase};
+use crate::timepoint::TimePoint;
+use crate::{graph::{Graph, GraphError}, task::{Task, TaskId, ComputedProgress}};
+use thiserror::Error;
+
+
+#[derive(Debug, Error)]
+enum TaskGraphError {
+    #[error("The birthline of the task '{name:?}' is later than its deadline.\nThis means it cannot be started until when it is already overdue.")]
+    BirthlineAfterDeadline {
+        name: String,
+    }
+}
 
 
 pub struct TaskGraph {
@@ -12,8 +21,91 @@ pub struct TaskGraph {
 }
 
 impl TaskGraph {
-    fn calculate(&mut self) -> Result<(), GraphError> {
-        todo!()
+    fn compute(&mut self, now: TimePoint) -> Result<(), GraphError> {
+        let pre_action = |task: &mut Task, dependencies: Vec<&mut Task>| {
+            for dep in dependencies {
+                dep.computed_deadline = dep.computed_deadline.min(task.computed_deadline); 
+                dep.computed_priority = dep.computed_priority.max(task.computed_priority); 
+                if dep.birthline > dep.computed_deadline {
+                    return Err(Box::new(TaskGraphError::BirthlineAfterDeadline { name: dep.name.to_string() }) as Box<dyn std::error::Error>);
+                }
+            }
+            Ok(())
+        };
+
+        let post_action = |task: &mut Task, dependencies: Vec<ComputedProgress>| {
+            if dependencies.len() == 0 {
+                return Ok(task.computed_progress);
+            }
+
+            let old_computed_progress = task.computed_progress;
+
+            task.computed_progress =
+            match task.progress {
+                Progress::Todo | Progress::Started | Progress::Done => {
+                    if dependencies.iter().any(|cp| *cp == ComputedProgress::Failed) {
+                        ComputedProgress::Failed
+                    }
+                    else if dependencies.iter().any(|cp| *cp == ComputedProgress::NotYet) {
+                        ComputedProgress::NotYet
+                    }
+                    else if dependencies.iter().all(|cp| *cp == ComputedProgress::Done) {
+                        if now < task.birthline {
+                            ComputedProgress::NotYet
+                        }
+                        else if task.auto_fail && task.progress != Progress::Done && now > task.computed_deadline {
+                            ComputedProgress::Failed
+                        }
+                        else if task.group_like {
+                            ComputedProgress::Done
+                        }
+                        else {
+                            task.progress.into()
+                        }
+                    } 
+                    else {
+                        ComputedProgress::Blocked
+                    }
+                },
+                Progress::Failed => {
+                    ComputedProgress::Failed
+                },
+            };
+
+            if old_computed_progress != ComputedProgress::Done && task.computed_progress == ComputedProgress::Done {
+                task.finished = Some(now.into());
+            }
+
+            Ok(task.computed_progress)
+        };
+
+        self.graph.depth_first_traverse(pre_action, post_action)?;
+
+        for ix in self.graph.indexes().collect::<Vec<_>>() {
+            let task = self.graph.get(ix)?;
+            if let Some(rec) = &task.recurrence {
+                if task.computed_progress == ComputedProgress::Done {
+                    let next_deadline =
+                    match rec.repeat_base {
+                        RepeatBase::Deadline => task.deadline + rec.repeat,
+                        RepeatBase::Finished => TimePoint::Normal(task.finished.unwrap()) + rec.repeat, // TODO: this is very ugly
+                    };
+                    if let Ok(next_instance) = self.graph.get_mut(rec.next_instance) {
+                        next_instance.deadline = next_deadline;
+                    }
+                    else {
+                        let mut next_instance = self.graph.get(ix)?.clone(); // Does not clone dependencies: `next_instance` will have no dependencies.
+                        next_instance.deadline = next_deadline;
+                        self.graph.add_node(next_instance);
+                    }
+                }
+                else {
+                    self.graph.remove(rec.next_instance); 
+                }
+            }
+        }
+
+        Ok(())
     }
 
     pub fn get_task(&self, id: TaskId) -> Option<JsTask> {
@@ -23,22 +115,26 @@ impl TaskGraph {
         Some(JsTask::from_task(task, id, children, parents))
     }
 
-    pub fn set_task(&mut self, js_task: JsTask) -> Result<(), JsError> {
+    pub fn set_task(&mut self, js_task: JsTask, now: f64) -> Result<(), JsError> {
         let result: Result<(), GraphError> =
         try_block! {
-            let (task, children) = js_task.to_task();
+            self.graph.remove(js_task.id);
+            let (mut task, children) = js_task.to_task();
+            task.computed_deadline = task.deadline;
+            task.computed_priority = task.priority;
+            task.computed_progress = task.progress.into();
             let id = self.graph.add_node(task);
             for child in children {
                 self.graph.add_edge(id, child)?;
             }
-            self.calculate()?;
+            self.compute(now.into())?;
         };
         result.map_err(|err| self.grapherror_to_jserror(err, "Error while saving task"))
     }
 
-    pub fn delete_task(&mut self, id: TaskId) -> Result<(), JsError> {
+    pub fn delete_task(&mut self, id: TaskId, now: f64) -> Result<(), JsError> {
         self.graph.remove(id);
-        self.calculate().map_err(|err| self.grapherror_to_jserror(err, "Error while deleting task"))?;
+        self.compute(now.into()).map_err(|err| self.grapherror_to_jserror(err, "Error while deleting task"))?;
         Ok(())
     }
 
