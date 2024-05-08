@@ -512,6 +512,19 @@ fn possible_children_of_node() {
 }
 
 #[test]
+fn iterate_nodes() {
+    let mut graph = Graph::default();
+    graph.add_node("one");
+    let two = graph.add_node("two");
+    graph.add_node("three");
+    graph.add_node("four");
+    graph.remove(two);
+    graph.add_node("five");
+
+    assert_eq!(graph.iter().collect::<HashSet<_>>(), HashSet::from([&"one", &"three", &"four", &"five"]));
+}
+
+#[test]
 fn serialize() {
     let mut graph = Graph::default();
     let n0 = graph.add_node(3);

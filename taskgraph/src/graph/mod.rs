@@ -1,4 +1,4 @@
-use std::{cell::UnsafeCell, collections::{hash_set, HashMap, HashSet}, error::Error, iter::Cycle, mem::transmute};
+use std::{cell::UnsafeCell, collections::{hash_map, hash_set, HashMap, HashSet}, error::Error, iter::Cycle, mem::transmute};
 use std::fmt::Debug;
 use serde::{Serialize, Serializer, Deserialize, Deserializer};
 use serde::ser::SerializeMap;
@@ -118,6 +118,17 @@ impl<T> Graph<T> {
 
     pub fn len(&self) -> usize {
         self.nodes.len()
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &T> {
+        self.nodes.values().map(|node| {
+            // SAFE: This methods takes `&self` therefore 
+            //       there cannot be any mutable references to 
+            //       any of the nodes.
+            unsafe {
+                &(*node.get()).value
+            }
+        })
     }
     
     pub fn get(&self, index: usize) -> Result<&T, GraphError> {
