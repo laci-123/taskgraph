@@ -33,26 +33,7 @@ impl JsError {
 
 
 #[wasm_bindgen]
-pub struct JsPossibleTask {
-    possible_progresses: Vec<Progress>,
-    possible_children: Vec<TaskId>, 
-}
-
-#[wasm_bindgen]
-impl JsPossibleTask {
-    #[wasm_bindgen(getter)]
-    pub fn possible_progresses(&self) -> Vec<Progress> {
-        self.possible_progresses.clone()
-    }
-
-    #[wasm_bindgen(getter)]
-    pub fn possible_children(&self) -> Vec<TaskId> {
-        self.possible_children.clone()
-    }
-}
-
-
-#[wasm_bindgen]
+#[derive(Default)]
 pub struct JsTask {
     #[wasm_bindgen(readonly)]
     pub id: TaskId,
@@ -86,6 +67,8 @@ pub struct JsTask {
     description: String,
     dependencies: Vec<TaskId>,
     others_depending_on_this: Vec<TaskId>,
+    possible_children: Vec<TaskId>,
+    is_progress_editable: bool,
 }
 
 #[wasm_bindgen]
@@ -108,10 +91,10 @@ impl JsTask {
         dependencies: Vec<TaskId>,
     ) -> Self {
         Self {
-            id, priority, computed_priority: 0, deadline, computed_deadline: f64::INFINITY, 
-            birthline, progress, computed_progress: ComputedProgress::default(), 
+            id, priority, deadline, birthline, progress, 
             group_like, auto_fail, finished, repeat, repeat_base, next_instance, 
-            name, description, dependencies, others_depending_on_this: vec![],
+            name, description, dependencies, computed_deadline: f64::INFINITY, 
+            ..Default::default()
         }
     }
 
@@ -134,10 +117,20 @@ impl JsTask {
     pub fn others_depending_on_this(&self) -> Vec<TaskId> {
         self.others_depending_on_this.clone()
     }
+
+    #[wasm_bindgen(getter)]
+    pub fn possible_childre(&self) -> Vec<TaskId> {
+        self.possible_children.clone()
+    }
 }
 
 impl JsTask {
-    pub fn from_task(task: &Task, id: TaskId, children: impl Iterator<Item = usize>, parents: impl Iterator<Item = usize>) -> Self {
+    pub fn from_task(task: &Task,
+                     id: TaskId,
+                     children: impl IntoIterator<Item = usize>,
+                     parents: impl IntoIterator<Item = usize>,
+                     possible_children: impl IntoIterator<Item = usize>,
+                     is_progress_editable: bool) -> Self {
         Self { 
             id, 
             priority: task.priority, 
@@ -155,8 +148,10 @@ impl JsTask {
             next_instance: task.recurrence.as_ref().map(|r| r.next_instance), 
             name: task.name.clone(), 
             description: task.description.clone(), 
-            dependencies: children.collect(), 
-            others_depending_on_this: parents.collect(), 
+            dependencies: children.into_iter().collect(),
+            others_depending_on_this: parents.into_iter().collect(), 
+            possible_children: possible_children.into_iter().collect(),
+            is_progress_editable,
         }
     }
 
@@ -165,8 +160,8 @@ impl JsTask {
         if let (Some(repeat), Some(repeat_base), Some(next_instance)) = (self.repeat, self.repeat_base, self.next_instance) {
             Some(Recurrence {
                 repeat: Duration::seconds(repeat as i64),
-                repeat_base: repeat_base,
-                next_instance: next_instance,
+                repeat_base,
+                next_instance,
             })
         }
         else {

@@ -109,10 +109,13 @@ impl TaskGraph {
     }
 
     pub fn get_task(&self, id: TaskId) -> Option<JsTask> {
-        let task     = self.graph.get(id).ok()?;
-        let children = self.graph.get_children(id).ok()?.copied();
-        let parents  = self.graph.get_parents(id).ok()?.copied();
-        Some(JsTask::from_task(task, id, children, parents))
+        let task                 = self.graph.get(id).ok()?;
+        let children             = self.graph.get_children(id).ok()?.copied();
+        let parents              = self.graph.get_parents(id).ok()?.copied();
+        let possible_children    = vec![]; // TODO!
+        let is_progress_editable = task.computed_progress != ComputedProgress::Blocked &&
+                                   task.computed_progress != ComputedProgress::Failed;
+        Some(JsTask::from_task(task, id, children, parents, possible_children, is_progress_editable))
     }
 
     pub fn set_task(&mut self, js_task: JsTask, now: f64) -> Result<(), JsError> {
@@ -146,7 +149,8 @@ impl TaskGraph {
                 let task     = self.graph.get(ix)?;
                 let children = self.graph.get_children(ix)?.copied();
                 let parents  = self.graph.get_parents(ix)?.copied();
-                js_tasks.push(JsTask::from_task(task, ix, children, parents));
+                let possible_children = vec![]; // TODO!
+                js_tasks.push(JsTask::from_task(task, ix, children, parents, possible_children, false));
             }
             js_tasks
         };
