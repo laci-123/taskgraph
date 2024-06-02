@@ -11,6 +11,7 @@
   "author": "Gohér László",
   "license": "ISC",
   "devDependencies": {
+    "@laci-123/taskgraph-lib": "1.0.2",
     "@types/react": "^18.2.74",
     "@types/react-dom": "^18.2.24",
     "copy-webpack-plugin": "^12.0.2",
@@ -20,8 +21,8 @@
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",
     "react-router-dom": "^6.22.3",
-    "taskgraph": "./taskgraph/pkg",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.3",
+    "webpack-cli": "^5.1.4"
   }
 }

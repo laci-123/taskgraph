@@ -1,3 +1,4 @@
 /node_modules/
 dist
 /taskgraph/local_test_runner.sh
+/.npmrc
